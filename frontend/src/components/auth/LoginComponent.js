@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 
 const LoginComponent = () => {
   const [username, setUsername] = useState('');
@@ -12,8 +12,8 @@ const LoginComponent = () => {
     event.preventDefault();
     setError('');
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', { username, password });
-      localStorage.setItem('token', response.data.token); // Store the JWT token
+      const response = await api.post('/auth/login', { username, password });
+      localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', response.data.role);
       localStorage.setItem('userId', response.data.userId);
       navigate(response.data.role === 'CUSTOMER' ? '/customer' : '/admin');
@@ -49,7 +49,7 @@ const LoginComponent = () => {
         </div>
         <button type="submit">Login</button>
         <p>
-          Don't have an account? <a href="/register">Register</a>
+          Don't have an account? <a href="/register">Register</a> | <a href="/forgot-password">Forgot Password?</a>
         </p>
       </form>
     </div>

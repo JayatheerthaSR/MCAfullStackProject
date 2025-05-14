@@ -40,4 +40,12 @@ public class Beneficiary {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+	public void setCustomer(Customer customer) {
+		this.customer = customer;		
+	}
+
+    
+
+
 }

@@ -1,6 +1,5 @@
 package com.app.banking.service;
 
-import com.app.banking.entity.Customer;
 import com.app.banking.entity.User;
 import com.app.banking.entity.Role;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,17 +1,13 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
-
-import io.jsonwebtoken.SignatureAlgorithm;
-
-
 
 @Entity
 @Table(name = "Users")
-@Data
-
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -40,7 +36,7 @@ public class User {
 
     @Column(name = "phone_number")
     private String phoneNumber;
-    
+
     private String address;
 
     @Column(name = "created_at", updatable = false)
@@ -49,85 +45,104 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-	public String getAddress() {
-		return address;
-	}
+    // Getters and setters for resetToken
+    public String getResetToken() {
+        return resetToken;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
 
+    public LocalDateTime getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
 
-	public String getUsername() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
+    }
 
-	public String getEmail() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    // Getters and setters for other fields
+    public String getUsername() {
+        return username;
+    }
 
-	public CharSequence getPassword() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public Object getLastName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public Object getPhoneNumber() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setFirstName(String username2) {
-		// TODO Auto-generated method stub
-		
-	}
+    public Role getRole() {
+        return role;
+    }
 
-	public void setLastName(Object lastName2) {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
-	public String getFirstName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public void setEmail(String email2) {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public void setPhoneNumber(Object phoneNumber2) {
-		// TODO Auto-generated method stub
-		
-	}
+    public String getLastName() {
+        return lastName;
+    }
 
-	public void setPassword(String encode) {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	public Role getRole() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public Object getUserId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }

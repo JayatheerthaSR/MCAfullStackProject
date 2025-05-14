@@ -3,6 +3,7 @@ package com.app.banking.controller;
 import com.app.banking.entity.User;
 import com.app.banking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.Optional;
 public class UserController {
 
     @Autowired
+    @Lazy
     private UserService userService;
 
     @PutMapping("/{userId}")

@@ -12,6 +12,8 @@ import UserProfileComponent from './components/customer/UserProfileComponent';
 import ViewCustomersComponent from './components/admin/ViewCustomersComponent';
 import ViewAllTransactionsComponent from './components/admin/ViewAllTransactionsComponent';
 import ProtectedRoute from './components/ProtectedRoute';
+import ForgotPasswordComponent from './components/auth/ForgotPasswordComponent';
+import ResetPasswordComponent from './components/auth/ResetPasswordComponent';
 import './App.css';
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
     <Routes>
       <Route path="/login" element={<LoginComponent />} />
       <Route path="/register" element={<RegistrationComponent />} />
+      <Route path="/forgot-password" element={<ForgotPasswordComponent />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordComponent />} />
 
       <Route path="/customer/*" element={<ProtectedRoute allowedRoles={['CUSTOMER']} />}>
         <Route index element={<CustomerDashboard />} />
@@ -33,11 +37,10 @@ function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="customers" element={<ViewCustomersComponent />} />
         <Route path="transactions" element={<ViewAllTransactionsComponent />} />
-        {/* Add more admin routes here */}
       </Route>
 
       <Route path="/" element={<div>Welcome to the Banking App</div>} />
-      <Route path="*" element={<div>Page Not Found</div>} /> {/* Catch-all for 404s */}
+      <Route path="*" element={<div>Page Not Found</div>} />
     </Routes>
   );
 }

@@ -1,10 +1,11 @@
 package com.app.banking.controller;
 
-import com.app.banking.entity.Transaction; // Adjust import if needed
-import com.app.banking.entity.User; // Adjust import if needed
-import com.app.banking.service.TransactionService; // Assuming you have this
+import com.app.banking.entity.Transaction;
+import com.app.banking.entity.User;
+import com.app.banking.service.TransactionService;
 import com.app.banking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy; // Import the @Lazy annotation
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +18,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')") // Secure all endpoints in this controller
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
+    @Lazy // Apply @Lazy to the userService dependency
     private UserService userService;
 
     @Autowired
@@ -32,7 +34,6 @@ public class AdminController {
         return ResponseEntity.ok(customers);
     }
 
-    // It seems you had a method to get a customer by ID. Let's keep it.
     @GetMapping("/customers/{customerId}")
     public ResponseEntity<?> getCustomerById(@PathVariable Long customerId) {
         Optional<User> customer = userService.findById(customerId);

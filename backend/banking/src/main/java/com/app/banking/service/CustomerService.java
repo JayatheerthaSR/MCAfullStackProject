@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-
 public class CustomerService {
 
     @Autowired
@@ -30,8 +29,8 @@ public class CustomerService {
 
     public Customer createCustomer(User user, String accountNumber) {
         Customer customer = new Customer();
-        customer.setUser(user);
-        customer.setAccountNumber(accountNumber);
+        customer.setUser(user); // Calls the setUser(User user) method in Customer
+        customer.setAccountNumber(accountNumber); // Calls the setAccountNumber(String accountNumber) method in Customer
         return customerRepository.save(customer);
     }
 
@@ -62,7 +61,7 @@ public class CustomerService {
     }
 
     public List<Beneficiary> getBeneficiaries(Long customerId) {
-        return beneficiaryRepository.findByCustomerId(customerId);
+        return beneficiaryRepository.findByCustomer_CustomerId(customerId);
     }
 
     @Transactional
@@ -108,6 +107,6 @@ public class CustomerService {
     }
 
     public List<Transaction> getTransactionsForCustomer(Long userId) {
-        return transactionRepository.findByUserIdOrderByTransactionDateDesc(userId);
+        return transactionRepository.findByUser_UserIdOrderByTransactionDateDesc(userId);
     }
 }
