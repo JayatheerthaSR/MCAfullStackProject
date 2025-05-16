@@ -1,8 +1,13 @@
 package com.app.banking.security;
 
+import com.app.banking.security.jwt.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -11,12 +16,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.app.banking.security.jwt.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -28,19 +30,19 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthFilter;
 
-    @Bean 
-    PasswordEncoder passwordEncoder() { 
-    	return new BCryptPasswordEncoder();
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder()); // Ensure this line is present
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-	
+
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -51,6 +53,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                // Allow OPTIONS requests for all /api/** paths FIRST
+                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/api/auth/verify-otp").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/customerDashboard").hasRole("CUSTOMER")
                 .requestMatchers("/adminDashboard").hasRole("ADMIN")
@@ -58,7 +64,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider()) // Ensure this line is present
+            .authenticationProvider(authenticationProvider())
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(logout -> logout
@@ -66,9 +72,16 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID"))
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore((request, response, chain) -> {
+                HttpServletRequest httpRequest = (HttpServletRequest) request;
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                if (!httpRequest.getServletPath().startsWith("/api/auth/register") &&
+                    !httpRequest.getServletPath().startsWith("/api/auth/verify-otp")) {
+                    jwtAuthFilter.doFilterInternal(httpRequest, httpResponse, chain);
+                } else {
+                    chain.doFilter(request, response);
+                }
+            }, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
-    // You can remove the getter and setter for jwtAuthFilter if not explicitly used elsewhere
 }

@@ -1,25 +1,33 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Customers")
 public class Customer {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")
     private Long customerId;
 
-    @Column(name = "account_number", unique = true, nullable = false)
-    private String accountNumber;
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+        name = "customer_account",
+        joinColumns = { @JoinColumn(name = "customer_id") },
+        inverseJoinColumns = { @JoinColumn(name = "account_number") }
+    )
+    private Set<Account> accounts = new HashSet<>();
 
-    @Column(name = "available_balance", nullable = false, precision = 10)
-    private Double availableBalance = 0.00;
-
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "customer_id")
     private User user;
+
+    public Customer() {
+    }
 
     public Long getCustomerId() {
         return customerId;
@@ -29,20 +37,12 @@ public class Customer {
         this.customerId = customerId;
     }
 
-    public String getAccountNumber() {
-        return accountNumber;
+    public Set<Account> getAccounts() {
+        return accounts;
     }
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
-
-    public Double getAvailableBalance() {
-        return availableBalance;
-    }
-
-    public void setAvailableBalance(Double availableBalance) {
-        this.availableBalance = availableBalance;
+    public void setAccounts(Set<Account> accounts) {
+        this.accounts = accounts;
     }
 
     public User getUser() {
@@ -51,5 +51,16 @@ public class Customer {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    // Helper methods to manage the relationship
+    public void addAccount(Account account) {
+        this.accounts.add(account);
+        account.getCustomers().add(this);
+    }
+
+    public void removeAccount(Account account) {
+        this.accounts.remove(account);
+        account.getCustomers().remove(this);
     }
 }

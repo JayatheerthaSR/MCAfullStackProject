@@ -29,7 +29,7 @@ public class UserController {
         updatedUser.setFirstName(updateData.get("firstName"));
         updatedUser.setLastName(updateData.get("lastName"));
         updatedUser.setEmail(updateData.get("email"));
-        updatedUser.setPhoneNumber(updateData.get("phoneNumber"));
+        updatedUser.setPhone_number(updateData.get("phoneNumber"));
         updatedUser.setAddress(updateData.get("address"));
         User savedUser = userService.updateUser(existingUser, updatedUser);
         return ResponseEntity.ok(savedUser);

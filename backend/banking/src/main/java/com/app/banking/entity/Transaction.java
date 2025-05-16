@@ -1,13 +1,10 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Transactions")
-@Data
 public class Transaction {
 
     @Id
@@ -34,34 +31,69 @@ public class Transaction {
     @Column(name = "beneficiary_account_number")
     private String beneficiaryAccountNumber; // For transfer transactions
 
+    @Column(name = "source_account_number") // Add this field
+    private String sourceAccountNumber;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-	public void setUser(User user) {
-		this.user = user;
-		
-	}
+    public Long getTransactionId() {
+        return transactionId;
+    }
 
-	public void setTransactionType(TransactionType transactionType) {
-		this.transactionType = transactionType;
-		
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setAmount(double amount) {
-		this.amount = amount;
-		
-	}
-	
-	public String getDescription() {
-		return description;
-	}
+    public TransactionType getTransactionType() {
+        return transactionType;
+    }
 
-	public void setDescription(String description) {
-		this.description =description;
-		
-	}
+    public double getAmount() {
+        return amount;
+    }
 
-	public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) {
-		this.beneficiaryAccountNumber = beneficiaryAccountNumber;		
-	}
+    public LocalDateTime getTransactionDate() {
+        return transactionDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getBeneficiaryAccountNumber() {
+        return beneficiaryAccountNumber;
+    }
+
+    public String getSourceAccountNumber() {
+        return sourceAccountNumber;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setTransactionType(TransactionType transactionType) {
+        this.transactionType = transactionType;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) {
+        this.beneficiaryAccountNumber = beneficiaryAccountNumber;
+    }
+
+    public void setSourceAccountNumber(String sourceAccountNumber) {
+        this.sourceAccountNumber = sourceAccountNumber;
+    }
 }

@@ -1,0 +1,106 @@
+/* CustomerDashboard.css */
+
+.customer-dashboard-container {
+  padding: 20px;
+}
+
+.accounts-section {
+  margin-bottom: 30px;
+}
+
+.accounts-section h3 {
+  margin-bottom: 15px;
+  color: #007bff; /* Primary color for heading */
+}
+
+.account-item {
+  border: 1px solid #e0e0e0;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+}
+
+.account-item strong {
+  font-weight: 500;
+  color: #333;
+}
+
+.account-item .text-muted {
+  font-size: 0.9em;
+}
+
+.balance-badge {
+  font-size: 1em;
+  padding: 0.5em 1em;
+}
+
+.dashboard-card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-card .card-title {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.dashboard-card .card-text {
+  color: #666;
+  font-size: 0.95em;
+}
+
+.dashboard-button {
+  margin-top: 15px;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 0.7em 1.2em;
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-button.btn-primary {
+  background-color: #007bff;
+}
+
+.dashboard-button.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.dashboard-button.btn-info {
+  background-color: #17a2b8;
+}
+
+.dashboard-button.btn-info:hover {
+  background-color: #117a8b;
+}
+
+.dashboard-button.btn-secondary {
+  background-color: #6c757d;
+}
+
+.dashboard-button.btn-secondary:hover {
+  background-color: #545b62;
+}
+
+.dashboard-button.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.dashboard-button.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.total-balance {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #28a745; /* Green color for emphasis */
+  text-align: right; /* Align to the right */
+  margin-top: 10px;
+}

@@ -35,7 +35,7 @@ public class User {
     private String email;
 
     @Column(name = "phone_number")
-    private String phoneNumber;
+    private String phone_number; // Changed field name to match database column
 
     private String address;
 
@@ -122,12 +122,12 @@ public class User {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone_number() { // Updated getter name
+        return phone_number;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone_number(String phone_number) { // Updated setter name
+        this.phone_number = phone_number;
     }
 
     public String getAddress() {
