@@ -9,8 +9,7 @@ import java.util.Set;
 public class Customer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "customer_id")
+    @Column(name = "customer_id") // Removed @GeneratedValue
     private Long customerId;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })

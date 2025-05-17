@@ -30,6 +30,9 @@ public class Beneficiary {
     @Column(name = "account_number", nullable = false)
     private String accountNumber;
 
+    @Column(name = "ifsc_code") // Add the ifscCode field
+    private String ifscCode;
+
     @Column(name = "max_transfer_limit", precision = 10)
     private BigDecimal maxTransferLimit;
 
@@ -65,6 +68,10 @@ public class Beneficiary {
         return accountNumber;
     }
 
+    public String getIfscCode() { // Add the getter for ifscCode
+        return ifscCode;
+    }
+
     public BigDecimal getMaxTransferLimit() {
         return maxTransferLimit;
     }
@@ -98,6 +105,10 @@ public class Beneficiary {
         this.accountNumber = accountNumber;
     }
 
+    public void setIfscCode(String ifscCode) { // Add the setter for ifscCode
+        this.ifscCode = ifscCode;
+    }
+
     public void setMaxTransferLimit(BigDecimal maxTransferLimit) {
         this.maxTransferLimit = maxTransferLimit;
     }
@@ -109,4 +120,5 @@ public class Beneficiary {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+    
 }

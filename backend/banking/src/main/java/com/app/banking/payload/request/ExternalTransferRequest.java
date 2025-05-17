@@ -1,13 +1,13 @@
 package com.app.banking.payload.request;
 
-import com.app.banking.entity.TransactionType;
+import java.math.BigDecimal;
 
-public class ExternalTransferRequest {
+public class ExternalTransferRequest extends TransferRequest {
     private String sourceAccountNumber;
     private String beneficiaryAccountNumber;
-    private Double amount;
+    private BigDecimal amount; // Changed to BigDecimal
     private String description;
-    private TransactionType transferType; // Added transferType field
+    private String transferType;
 
     public ExternalTransferRequest() {
     }
@@ -28,11 +28,11 @@ public class ExternalTransferRequest {
         this.beneficiaryAccountNumber = beneficiaryAccountNumber;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() { // Return type is now BigDecimal
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) { // Parameter type is now BigDecimal
         this.amount = amount;
     }
 
@@ -44,11 +44,11 @@ public class ExternalTransferRequest {
         this.description = description;
     }
 
-    public TransactionType getTransferType() {
+    public String getTransferType() {
         return transferType;
     }
 
-    public void setTransferType(TransactionType transferType) {
+    public void setTransferType(String transferType) {
         this.transferType = transferType;
     }
 
@@ -59,7 +59,7 @@ public class ExternalTransferRequest {
                 ", beneficiaryAccountNumber='" + beneficiaryAccountNumber + '\'' +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
-                ", transferType=" + transferType + // Include transferType in toString
+                ", transferType='" + transferType + '\'' +
                 '}';
     }
 }

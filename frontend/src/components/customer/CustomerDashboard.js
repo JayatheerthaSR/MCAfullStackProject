@@ -45,7 +45,7 @@ const CustomerDashboard = () => {
   return (
     <div className="customer-dashboard-container">
       <h2>Customer Dashboard</h2>
-      <p className="lead">Welcome, Customer!</p>
+      <p>Welcome to your dashboard! Here you can manage your accounts, view transactions, and more.</p>
 
       {/* Display Accounts and Balances */}
       <div className="mb-4 accounts-section">

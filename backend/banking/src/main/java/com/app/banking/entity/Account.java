@@ -1,6 +1,7 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,8 +15,8 @@ public class Account {
     @Column(name = "account_type", nullable = false)
     private String accountType;
 
-    @Column(name = "balance", nullable = false, precision = 10)
-    private Double balance = 0.00;
+    @Column(name = "balance", nullable = false, precision = 10, scale = 2)
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @ManyToMany(mappedBy = "accounts")
     private Set<Customer> customers = new HashSet<>();
@@ -39,11 +40,11 @@ public class Account {
         this.accountType = accountType;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
@@ -54,4 +55,6 @@ public class Account {
     public void setCustomers(Set<Customer> customers) {
         this.customers = customers;
     }
+
+	
 }

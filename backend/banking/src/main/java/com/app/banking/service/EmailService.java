@@ -38,4 +38,18 @@ public class EmailService {
         mailSender.send(message);
         System.out.println("OTP email sent to: " + toEmail);
     }
+
+    public void sendUpdateEmailOTPEmail(String toEmail, String otp) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setReplyTo("do-not-reply@mail.com");
+        message.setFrom("ajaysrao5@gmail.com"); // Use your email address
+        message.setTo(toEmail);
+        message.setSubject("Verify Your New Email for Banking App");
+        message.setText("You are updating your email address. Please use the following OTP to verify your new email: " + otp + ". This OTP will expire in 10 minutes.");
+
+        System.out.println("Sending update email OTP: " + otp + " to: " + toEmail); // Optional logging
+
+        mailSender.send(message);
+        System.out.println("Update email OTP sent to: " + toEmail);
+    }
 }

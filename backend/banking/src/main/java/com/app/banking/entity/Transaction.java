@@ -1,6 +1,8 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,7 +23,7 @@ public class Transaction {
     private TransactionType transactionType;
 
     @Column(nullable = false, precision = 10)
-    private double amount;
+    private BigDecimal amount;
 
     @Column(name = "transaction_date", updatable = false)
     private LocalDateTime transactionDate = LocalDateTime.now();
@@ -49,7 +51,7 @@ public class Transaction {
         return transactionType;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
@@ -81,8 +83,8 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setAmount(BigDecimal bigDecimal) {
+        this.amount = bigDecimal;
     }
 
     public void setDescription(String description) {

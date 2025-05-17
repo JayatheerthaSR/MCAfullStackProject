@@ -2,6 +2,7 @@ package com.app.banking.repository;
 
 import com.app.banking.entity.Account;
 import com.app.banking.entity.Customer;
+import com.app.banking.entity.User; // Make sure to import the User entity
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     // ... other methods
 
     Optional<Customer> findByUser_Username(String username);
+
+    Optional<Customer> findByUser(User user); // Add this line
 
     @Query("SELECT a.accountNumber, a.accountType FROM Customer c JOIN c.accounts a WHERE c.user.userId = :customerId")
     List<Object[]> findAccountsByCustomerId(@Param("customerId") Long customerId);

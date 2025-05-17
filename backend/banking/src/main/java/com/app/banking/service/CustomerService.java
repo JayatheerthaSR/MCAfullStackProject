@@ -7,15 +7,20 @@ import com.app.banking.entity.Transaction;
 import com.app.banking.entity.TransactionType;
 import com.app.banking.entity.User;
 import com.app.banking.exception.ResourceNotFoundException;
+import com.app.banking.payload.request.ExternalTransferRequest;
+import com.app.banking.payload.request.InternalTransferRequest;
 import com.app.banking.payload.response.AccountInfoResponse;
-import com.app.banking.payload.response.TransactionResponse; // Import TransactionResponse
+import com.app.banking.payload.response.TransactionResponse;
+import com.app.banking.payload.response.UserProfileResponse; // Import UserProfileResponse
 import com.app.banking.repository.AccountRepository;
 import com.app.banking.repository.BeneficiaryRepository;
 import com.app.banking.repository.CustomerRepository;
 import com.app.banking.repository.TransactionRepository;
+import com.app.banking.repository.UserRepository; // Import UserRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +43,9 @@ public class CustomerService {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private UserRepository userRepository; // Inject UserRepository
+
     public List<AccountInfoResponse> getAccountsByCustomerId(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
@@ -56,7 +64,7 @@ public class CustomerService {
         Account account = new Account();
         account.setAccountNumber(accountNumber);
         account.setAccountType("SAVINGS"); // You can make this dynamic if needed
-        account.setBalance(0.00);
+        account.setBalance(BigDecimal.ZERO); // Using BigDecimal.ZERO
         account.getCustomers().add(savedCustomer);
         accountRepository.save(account);
         savedCustomer.getAccounts().add(account);
@@ -73,12 +81,8 @@ public class CustomerService {
     }
 
     public Optional<Customer> findCustomerByAccountNumber(String accountNumber) {
-        // Find the Account by accountNumber
         Optional<Account> accountOptional = accountRepository.findByAccountNumber(accountNumber);
         if (accountOptional.isPresent()) {
-            // Since it's a ManyToMany, an account can have multiple customers.
-            // Returning the first one found might not be the best approach in all scenarios.
-            // You might need to adjust this based on your specific requirements.
             return accountOptional.get().getCustomers().stream().findFirst();
         }
         return Optional.empty();
@@ -121,41 +125,40 @@ public class CustomerService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Sender account not found for this customer"));
 
-        if (beneficiary.getMaxTransferLimit() != null && amount.compareTo(beneficiary.getMaxTransferLimit().doubleValue()) > 0) {
+        BigDecimal transferAmount = BigDecimal.valueOf(amount);
+
+        if (beneficiary.getMaxTransferLimit() != null && transferAmount.compareTo(beneficiary.getMaxTransferLimit()) > 0) {
             throw new RuntimeException("Transfer amount exceeds the maximum transfer limit for this beneficiary.");
         }
 
-        if (senderAccount.getBalance() < amount) {
+        if (senderAccount.getBalance().compareTo(transferAmount) < 0) {
             throw new RuntimeException("Insufficient balance in source account");
         }
 
-        senderAccount.setBalance(senderAccount.getBalance() - amount);
+        senderAccount.setBalance(senderAccount.getBalance().subtract(transferAmount)); // Using BigDecimal subtract
         accountRepository.save(senderAccount);
 
-        // Record transaction for sender (External)
         Transaction transactionSender = new Transaction();
         transactionSender.setUser(senderCustomer.getUser());
-        transactionSender.setTransactionType(TransactionType.TRANSFER); // Use TRANSFER for external
-        transactionSender.setAmount(-amount);
-        transactionSender.setDescription("External transfer to " + beneficiary.getBeneficiaryName() + " (" + beneficiaryAccountNumber + "): " + description);
+        transactionSender.setTransactionType(TransactionType.INTERNAL); // Assuming this is for beneficiary transfers
+        transactionSender.setAmount(transferAmount.negate());
+        transactionSender.setDescription("Transfer to " + beneficiary.getBeneficiaryName() + " (" + beneficiaryAccountNumber + "): " + description);
         transactionSender.setBeneficiaryAccountNumber(beneficiaryAccountNumber);
         transactionRepository.save(transactionSender);
 
-        // Placeholder for external payment gateway interaction:
-        // System.out.println("Initiating external transfer to: " + beneficiary.getBankName() + " - " + beneficiaryAccountNumber + " for amount: " + amount);
+        // Placeholder for external payment gateway interaction if needed in this method
     }
 
-    public List<TransactionResponse> getTransactionsForCustomer(Long userId) { // Changed return type to List<TransactionResponse>
+    public TransactionResponse getTransactionsForCustomer(Long userId) {
         Customer customer = customerRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
-        return transactionService.getTransactionsByUserId(customer.getUser().getUserId()); // This method in TransactionService should return List<TransactionResponse>
+        return transactionService.getTransactionsByUserId(customer);
     }
 
     @Transactional
     public void internalTransfer(Long senderCustomerId, String sourceAccountNumber, String recipientAccountNumber, Double amount, String description) {
         Customer senderCustomer = customerRepository.findById(senderCustomerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sender customer not found"));
-        // Need to find the recipient Customer based on the recipientAccountNumber
         Optional<Account> recipientAccountOptionalForCustomer = accountRepository.findByAccountNumber(recipientAccountNumber);
         Customer recipientCustomer = recipientAccountOptionalForCustomer.flatMap(account -> account.getCustomers().stream().findFirst())
                 .orElseThrow(() -> new ResourceNotFoundException("Recipient customer not found for account number: " + recipientAccountNumber));
@@ -170,34 +173,34 @@ public class CustomerService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Recipient account not found"));
 
+        BigDecimal transferAmount = BigDecimal.valueOf(amount);
+
         if (senderAccount.getAccountNumber().equals(recipientAccount.getAccountNumber())) {
             throw new RuntimeException("Cannot transfer to the same account");
         }
 
-        if (senderAccount.getBalance() < amount) {
+        if (senderAccount.getBalance().compareTo(transferAmount) < 0) {
             throw new RuntimeException("Insufficient balance in source account");
         }
 
-        senderAccount.setBalance(senderAccount.getBalance() - amount);
-        recipientAccount.setBalance(recipientAccount.getBalance() + amount);
+        senderAccount.setBalance(senderAccount.getBalance().subtract(transferAmount)); // Using BigDecimal subtract
+        recipientAccount.setBalance(recipientAccount.getBalance().add(transferAmount)); // Using BigDecimal add
 
         accountRepository.save(senderAccount);
         accountRepository.save(recipientAccount);
 
-        // Record transaction for sender (Internal)
         Transaction transactionSender = new Transaction();
         transactionSender.setUser(senderCustomer.getUser());
-        transactionSender.setTransactionType(TransactionType.INTERNAL_TRANSFER);
-        transactionSender.setAmount(-amount);
+        transactionSender.setTransactionType(TransactionType.INTERNAL);
+        transactionSender.setAmount(transferAmount.negate());
         transactionSender.setDescription("Internal transfer to account: " + recipientAccountNumber + " - " + description);
         transactionSender.setBeneficiaryAccountNumber(recipientAccountNumber);
         transactionRepository.save(transactionSender);
 
-        // Record transaction for recipient (Internal)
         Transaction transactionRecipient = new Transaction();
         transactionRecipient.setUser(recipientCustomer.getUser());
-        transactionRecipient.setTransactionType(TransactionType.INTERNAL_TRANSFER);
-        transactionRecipient.setAmount(amount);
+        transactionRecipient.setTransactionType(TransactionType.INTERNAL);
+        transactionRecipient.setAmount(transferAmount);
         transactionRecipient.setDescription("Internal transfer from account: " + senderAccount.getAccountNumber() + " - " + description);
         transactionRecipient.setBeneficiaryAccountNumber(senderAccount.getAccountNumber());
         transactionRepository.save(transactionRecipient);
@@ -211,7 +214,111 @@ public class CustomerService {
         return null;
     }
 
-    public Optional<Customer> findById(Long id) { // Add this method
+    public Optional<Customer> findById(Long id) {
         return customerRepository.findById(id);
+    }
+
+    @Transactional
+    public void transferExternalMoney(Long customerId, ExternalTransferRequest externalTransferRequest) {
+        Customer senderCustomer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sender customer not found"));
+        Account senderAccount = senderCustomer.getAccounts().stream()
+                .filter(account -> account.getAccountNumber().equals(externalTransferRequest.getSourceAccountNumber()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Sender account not found for this customer"));
+
+        if (senderAccount.getBalance().compareTo(externalTransferRequest.getAmount()) < 0) {
+            throw new RuntimeException("Insufficient balance in source account");
+        }
+
+        senderAccount.setBalance(senderAccount.getBalance().subtract(externalTransferRequest.getAmount())); // Using BigDecimal subtract
+        accountRepository.save(senderAccount);
+
+        Transaction transactionSender = new Transaction();
+        transactionSender.setUser(senderCustomer.getUser());
+        transactionSender.setTransactionType(TransactionType.EXTERNAL);
+        transactionSender.setAmount(externalTransferRequest.getAmount().negate()); // Assuming amount in request is BigDecimal
+        transactionSender.setDescription("External transfer to account: " + externalTransferRequest.getBeneficiaryAccountNumber() + " - " + externalTransferRequest.getDescription());
+        transactionSender.setBeneficiaryAccountNumber(externalTransferRequest.getBeneficiaryAccountNumber());
+        transactionRepository.save(transactionSender);
+
+        // Placeholder for external payment gateway interaction
+        System.out.println("Initiating external transfer: " + externalTransferRequest);
+    }
+
+    @Transactional
+    public void transferInternalMoney(Long customerId, InternalTransferRequest internalTransferRequest) {
+        Customer senderCustomer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sender customer not found"));
+        Account senderAccount = senderCustomer.getAccounts().stream()
+                .filter(account -> account.getAccountNumber().equals(internalTransferRequest.getSourceAccountNumber()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Sender account not found for this customer"));
+
+        Optional<Account> recipientAccountOptional = accountRepository.findByAccountNumber(internalTransferRequest.getRecipientAccountNumber());
+        Account recipientAccount = recipientAccountOptional
+                .orElseThrow(() -> new ResourceNotFoundException("Recipient account not found"));
+
+        Optional<Customer> recipientCustomerOptional = recipientAccount.getCustomers().stream().findFirst();
+        Customer recipientCustomer = recipientCustomerOptional
+                .orElseThrow(() -> new ResourceNotFoundException("Recipient customer not found for account: " + internalTransferRequest.getRecipientAccountNumber()));
+
+        if (senderAccount.getAccountNumber().equals(recipientAccount.getAccountNumber())) {
+            throw new RuntimeException("Cannot transfer to the same account");
+        }
+
+        if (senderAccount.getBalance().compareTo(internalTransferRequest.getAmount()) < 0) {
+            throw new RuntimeException("Insufficient balance in source account");
+        }
+
+        senderAccount.setBalance(senderAccount.getBalance().subtract(internalTransferRequest.getAmount())); // Using BigDecimal subtract
+        recipientAccount.setBalance(recipientAccount.getBalance().add(internalTransferRequest.getAmount())); // Using BigDecimal add
+
+        accountRepository.save(senderAccount);
+        accountRepository.save(recipientAccount);
+
+        Transaction transactionSender = new Transaction();
+        transactionSender.setUser(senderCustomer.getUser());
+        transactionSender.setTransactionType(TransactionType.INTERNAL);
+        transactionSender.setAmount(internalTransferRequest.getAmount().negate());
+        transactionSender.setDescription("Internal transfer to account: " + internalTransferRequest.getRecipientAccountNumber() + " - " + internalTransferRequest.getDescription());
+        transactionSender.setBeneficiaryAccountNumber(internalTransferRequest.getRecipientAccountNumber());
+        transactionRepository.save(transactionSender);
+
+        Transaction transactionRecipient = new Transaction();
+        transactionRecipient.setUser(recipientCustomer.getUser());
+        transactionRecipient.setTransactionType(TransactionType.INTERNAL);
+        transactionRecipient.setAmount(internalTransferRequest.getAmount());
+        transactionRecipient.setDescription("Internal transfer from account: " + senderAccount.getAccountNumber() + " - " + internalTransferRequest.getDescription());
+        transactionRecipient.setBeneficiaryAccountNumber(senderAccount.getAccountNumber());
+        transactionRepository.save(transactionRecipient);
+    }
+
+    public UserProfileResponse getCustomerProfileWithAccounts(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        Customer customer = customerRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user id: " + userId));
+        List<Account> accounts = accountRepository.findByCustomers(customer); // Changed to findByCustomers
+        List<AccountInfoResponse> accountInfoResponses = accounts.stream()
+                .map(account -> new AccountInfoResponse(
+                        account.getAccountNumber(),
+                        account.getAccountType(),
+                        account.getBalance()
+                ))
+                .collect(Collectors.toList());
+
+        UserProfileResponse profileResponse = new UserProfileResponse();
+        profileResponse.setUserId(user.getUserId());
+        profileResponse.setUsername(user.getUsername());
+        profileResponse.setRole(user.getRole());
+        profileResponse.setFirstName(user.getFirstName());
+        profileResponse.setLastName(user.getLastName());
+        profileResponse.setEmail(user.getEmail());
+        profileResponse.setPhoneNumber(user.getPhone_number());
+        profileResponse.setAddress(user.getAddress());
+        profileResponse.setAccounts(accountInfoResponses);
+
+        return profileResponse;
     }
 }

@@ -1,20 +1,20 @@
+// In AccountInfoResponse.java
 package com.app.banking.payload.response;
+
+import java.math.BigDecimal;
 
 public class AccountInfoResponse {
     private String accountNumber;
     private String accountType;
-    private Double balance; // Changed to Double
+    private BigDecimal balance; // Changed to BigDecimal
 
-    public AccountInfoResponse() {
-    }
-
-    public AccountInfoResponse(String accountNumber, String accountType, Double balance) {
+    public AccountInfoResponse(String accountNumber, String accountType, BigDecimal balance) {
         this.accountNumber = accountNumber;
         this.accountType = accountType;
         this.balance = balance;
     }
 
-    // Getters and Setters
+    // Getters and setters (you likely already have these)
     public String getAccountNumber() {
         return accountNumber;
     }
@@ -31,11 +31,11 @@ public class AccountInfoResponse {
         this.accountType = accountType;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 }

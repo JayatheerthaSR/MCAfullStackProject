@@ -173,7 +173,8 @@ const TransferMoneyComponent = () => {
           return;
         }
         transferData.recipientAccountNumber = internalRecipientAccountNumber;
-        response = await api.post(`/customers/${customerId}/transfer/internal`, transferData);
+        transferData.transferType = 'INTERNAL'; // Add transferType for internal
+        response = await api.post(`/customers/${customerId}/transfer`, transferData); // Keep the /transfer endpoint
       } else {
         if (!selectedBeneficiary) {
           setError('Please select a beneficiary.');
@@ -184,7 +185,8 @@ const TransferMoneyComponent = () => {
           return;
         }
         transferData.beneficiaryAccountNumber = selectedBeneficiary.accountNumber;
-        response = await api.post(`/customers/${customerId}/transfer`, transferData);
+        transferData.transferType = 'EXTERNAL'; // Add transferType for external
+        response = await api.post(`/customers/${customerId}/transfer`, transferData); // Keep the /transfer endpoint
       }
 
       if (response.status === 200) {
@@ -217,6 +219,8 @@ const TransferMoneyComponent = () => {
             setError('You cannot transfer money to the same account.');
           } else if (error.response.data?.includes('Transfer amount exceeds the maximum transfer limit')) {
             setError(error.response.data);
+          } else if (error.response.data === 'Invalid transfer type.') {
+            setError('Invalid transfer type.'); // Keep this error handling
           } else {
             setError(error.response.data?.message || 'Transfer failed due to a bad request.');
           }

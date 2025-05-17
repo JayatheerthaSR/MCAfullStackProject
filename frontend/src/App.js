@@ -9,7 +9,7 @@ import UpdateProfileComponent from './components/profile/UpdateProfileComponent'
 import ViewTransactionsComponent from './components/customer/ViewTransactionsComponent';
 import AddBeneficiaryComponent from './components/customer/AddBeneficiaryComponent';
 import TransferMoneyComponent from './components/customer/TransferMoneyComponent';
-import UserProfileComponent from './components/customer/UserProfileComponent';
+import UserProfileComponent from './components/profile/UserProfileComponent'; // Updated import path
 import ViewCustomersComponent from './components/admin/ViewCustomersComponent';
 import ViewAllTransactionsComponent from './components/admin/ViewAllTransactionsComponent';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -42,7 +42,7 @@ function App() {
               <Route path="beneficiaries" element={<BeneficiaryListComponent />} />
               <Route path="beneficiaries/add" element={<AddBeneficiaryComponent />} />
               <Route path="transfer" element={<TransferMoneyComponent />} />
-              <Route path="profile" element={<UserProfileComponent />} />
+              <Route path="profile" element={<UserProfileComponent />} /> {/* Using the common UserProfileComponent */}
               <Route path="profile/update" element={<UpdateProfileComponent />} />
               {/* Add the Change Password route for customers */}
               <Route path="profile/change-password" element={<ChangePasswordComponent redirectPath="/customer/profile" />} />

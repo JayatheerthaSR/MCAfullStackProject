@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 const ViewTransactionsComponent = () => {
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState('');
-  const [expandedTransactionId, setExpandedTransactionId] = useState(null);
   const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
@@ -33,7 +32,13 @@ const ViewTransactionsComponent = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        setTransactions(response.data);
+
+        const processedTransactions = response.data.transactions.map(transaction => ({
+          ...transaction,
+          creditDebit: parseFloat(transaction.amount) > 0 ? 'Credit' : 'Debit', // Convert to number for comparison
+        }));
+        setTransactions(processedTransactions);
+
       } catch (err) {
         console.error('Failed to fetch transactions:', err);
         if (err.response) {
@@ -49,23 +54,18 @@ const ViewTransactionsComponent = () => {
     fetchTransactions();
   }, [userId, token]);
 
-  const toggleExpand = (transactionId) => {
-    setExpandedTransactionId(expandedTransactionId === transactionId ? null : transactionId);
-  };
 
   const downloadPdf = () => {
     const doc = new jsPDF();
     doc.text('Your Transactions', 10, 10);
-    doc.autoTable({
-      head: [['Date', 'Type', 'Description', 'Amount', 'From Account', 'Beneficiary Account', 'Beneficiary Name']],
+    autoTable(doc, {
+      head: [['Date', 'Description', 'Amount', 'Credit/Debit', 'Transaction ID']],
       body: transactions.map(transaction => [
         transaction.date,
-        transaction.type,
         transaction.description,
         transaction.amount,
-        transaction.fromAccount || '-',
-        transaction.beneficiaryAccountNumber || '-',
-        transaction.beneficiaryName || '-',
+        transaction.creditDebit,
+        transaction.transactionId,
       ]),
     });
     doc.save('transactions.pdf');
@@ -74,12 +74,10 @@ const ViewTransactionsComponent = () => {
   const downloadExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(transactions.map(transaction => ({
       Date: transaction.date,
-      Type: transaction.type,
       Description: transaction.description,
       Amount: transaction.amount,
-      'From Account': transaction.fromAccount || '-',
-      'Beneficiary Account': transaction.beneficiaryAccountNumber || '-',
-      'Beneficiary Name': transaction.beneficiaryName || '-',
+      'Credit/Debit': transaction.creditDebit,
+      'Transaction ID': transaction.transactionId,
     })));
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
@@ -105,37 +103,21 @@ const ViewTransactionsComponent = () => {
           <thead>
             <tr>
               <th>Date</th>
-              <th>Type</th>
               <th>Description</th>
               <th className="text-end">Amount</th>
-              <th>Details</th>
+              <th>Credit/Debit</th>
+              <th>Transaction ID</th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((transaction) => (
-              <React.Fragment key={transaction.transactionId}>
-                <tr onClick={() => toggleExpand(transaction.transactionId)} style={{ cursor: 'pointer' }}>
-                  <td>{transaction.date}</td>
-                  <td>{transaction.type}</td>
-                  <td>{transaction.description}</td>
-                  <td className={`text-end ${transaction.amount < 0 ? 'text-danger' : 'text-success'}`}>{transaction.amount}</td>
-                  <td>
-                    {expandedTransactionId === transaction.transactionId ? '▲' : '▼'}
-                  </td>
-                </tr>
-                {expandedTransactionId === transaction.transactionId && (
-                  <tr>
-                    <td colSpan="5">
-                      <div className="p-2">
-                        <p><strong>Transaction ID:</strong> {transaction.transactionId}</p>
-                        <p><strong>From Account:</strong> {transaction.fromAccount || '-'}</p>
-                        <p><strong>Beneficiary Account:</strong> {transaction.beneficiaryAccountNumber || '-'}</p>
-                        <p><strong>Beneficiary Name:</strong> {transaction.beneficiaryName || '-'}</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
+              <tr key={transaction.transactionId}>
+                <td>{transaction.date}</td>
+                <td>{transaction.description}</td>
+                <td className={`text-end ${parseFloat(transaction.amount) < 0 ? 'text-danger' : 'text-success'}`}>{transaction.amount}</td> {/* parseFloat here */}
+                <td>{transaction.creditDebit}</td>
+                <td>{transaction.transactionId}</td>
+              </tr>
             ))}
           </tbody>
         </table>

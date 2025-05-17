@@ -1,10 +1,13 @@
 package com.app.banking.payload.request;
 
-public class InternalTransferRequest {
+import java.math.BigDecimal;
+
+public class InternalTransferRequest extends TransferRequest {
     private String sourceAccountNumber;
     private String recipientAccountNumber;
-    private Double amount;
+    private BigDecimal amount; // Changed to BigDecimal
     private String description;
+    private String transferType;
 
     public InternalTransferRequest() {
     }
@@ -25,11 +28,11 @@ public class InternalTransferRequest {
         this.recipientAccountNumber = recipientAccountNumber;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() { // Return type is now BigDecimal
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) { // Parameter type is now BigDecimal
         this.amount = amount;
     }
 
@@ -39,5 +42,13 @@ public class InternalTransferRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getTransferType() {
+        return transferType;
+    }
+
+    public void setTransferType(String transferType) {
+        this.transferType = transferType;
     }
 }

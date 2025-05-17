@@ -2,8 +2,12 @@ package com.app.banking.payload.response;
 
 import java.util.List;
 
-public class CustomerProfileResponse {
-    private Long customerId;
+import com.app.banking.entity.Role;
+
+public class UserProfileResponse {
+	private Role role;
+    private Long userId; // Changed from customerId to userId for generality
+    private String username; // Added username
     private String firstName;
     private String lastName;
     private String email;
@@ -12,11 +16,12 @@ public class CustomerProfileResponse {
     private List<AccountInfoResponse> accounts;
 
     // Constructors, Getters, Setters
-    public CustomerProfileResponse() {
+    public UserProfileResponse() {
     }
 
-    public CustomerProfileResponse(Long customerId, String firstName, String lastName, String email, String phoneNumber, String address, List<AccountInfoResponse> accounts) {
-        this.customerId = customerId;
+    public UserProfileResponse(Long userId, String username, String firstName, String lastName, String email, String phoneNumber, String address, List<AccountInfoResponse> accounts) {
+        this.userId = userId;
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -24,14 +29,29 @@ public class CustomerProfileResponse {
         this.address = address;
         this.accounts = accounts;
     }
-
-    // Getters and Setters (as previously defined)
-    public Long getCustomerId() {
-        return customerId;
+    
+    public Role getRole() {
+        return role;
+    }
+    
+    public void setRole(Role role) {
+        this.role = role;
     }
 
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getFirstName() {

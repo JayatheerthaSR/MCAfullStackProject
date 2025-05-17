@@ -1,8 +1,8 @@
 package com.app.banking.controller;
 
-import com.app.banking.entity.User;
 import com.app.banking.entity.Customer;
 import com.app.banking.entity.Role;
+import com.app.banking.entity.User;
 import com.app.banking.payload.request.ForgotPasswordRequest;
 import com.app.banking.payload.request.OTPVerificationRequest;
 import com.app.banking.payload.request.RegistrationRequest;
@@ -10,9 +10,7 @@ import com.app.banking.payload.request.ResetPasswordRequest;
 import com.app.banking.security.jwt.JwtUtil;
 import com.app.banking.service.CustomerService;
 import com.app.banking.service.UserService;
-
 import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
@@ -75,6 +73,52 @@ public class AuthController {
             return ResponseEntity.ok("Email verified successfully. You can now log in.");
         } else {
             return ResponseEntity.badRequest().body("Invalid or expired OTP.");
+        }
+    }
+
+    @PostMapping("/initiate-update-email")
+    public ResponseEntity<?> initiateUpdateEmail(@RequestBody Map<String, String> payload) {
+        String userIdStr = payload.get("userId");
+        String newEmail = payload.get("newEmail");
+
+        if (userIdStr == null || newEmail == null) {
+            return ResponseEntity.badRequest().body("User ID and new email are required.");
+        }
+
+        try {
+            Long userId = Long.parseLong(userIdStr);
+            userService.initiateUpdateEmail(userId, newEmail);
+            return ResponseEntity.ok("OTP sent to your new email address for verification.");
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Invalid user ID format.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-update-email-otp")
+    public ResponseEntity<?> verifyUpdateEmailOTP(@RequestBody OTPVerificationRequest verificationRequest) {
+        String userIdStr = verificationRequest.getUserId(); // Assuming you send userId here
+        String newEmail = verificationRequest.getEmail();
+        String otp = verificationRequest.getOtp();
+
+        if (userIdStr == null || newEmail == null || otp == null) {
+            return ResponseEntity.badRequest().body("User ID, new email, and OTP are required.");
+        }
+
+        try {
+            Long userId = Long.parseLong(userIdStr);
+            if (userService.verifyUpdateEmailOTP(userId, newEmail, otp)) {
+                return ResponseEntity.ok("New email verified successfully. You can now update your profile.");
+                // You might want to store a temporary flag in the session or database
+                // indicating that this userId has verified this newEmail.
+            } else {
+                return ResponseEntity.badRequest().body("Invalid or expired OTP for new email.");
+            }
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Invalid user ID format.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
