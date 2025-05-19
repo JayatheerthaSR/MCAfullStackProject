@@ -1,6 +1,7 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -35,7 +36,7 @@ public class User {
     private String email;
 
     @Column(name = "phone_number")
-    private String phone_number; // Changed field name to match database column
+    private String phone_number;
 
     private String address;
 
@@ -51,9 +52,22 @@ public class User {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    @Column(name = "is_active") // Add this field
+    @NotNull
+    private boolean isActive = true; // Default to true
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // Getter and setter for isActive
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     // Getters and setters for resetToken
@@ -73,7 +87,7 @@ public class User {
         this.resetTokenExpiry = resetTokenExpiry;
     }
 
-    // Getters and setters for other fields
+    // Getters and setters for other fields (rest of your existing getters and setters)
     public String getUsername() {
         return username;
     }
@@ -122,11 +136,11 @@ public class User {
         this.email = email;
     }
 
-    public String getPhone_number() { // Updated getter name
+    public String getPhone_number() {
         return phone_number;
     }
 
-    public void setPhone_number(String phone_number) { // Updated setter name
+    public void setPhone_number(String phone_number) {
         this.phone_number = phone_number;
     }
 

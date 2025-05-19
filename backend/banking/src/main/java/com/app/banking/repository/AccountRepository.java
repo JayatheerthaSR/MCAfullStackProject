@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, String> {
+	List<Account> findByAccountNumberContaining(String accountNumber);
     // You can add custom query methods here if needed in the future
     // For example:
     Optional<Account> findByAccountNumber(String accountNumber);

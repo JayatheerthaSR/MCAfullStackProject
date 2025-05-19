@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import './CustomerDashboard.css'; // Optional: Create a CSS file for styling
+import './CustomerDashboard.css'; // Keep this for any specific custom styles
+
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const CustomerDashboard = () => {
   const customerId = localStorage.getItem('userId');
   const [accounts, setAccounts] = useState([]);
-  const [accountError, setAccountError] = useState(''); // Separate error for accounts
+  const [accountError, setAccountError] = useState('');
   const [loadingAccounts, setLoadingAccounts] = useState(true);
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -39,95 +43,96 @@ const CustomerDashboard = () => {
     }
   }, [customerId]);
 
-  // Calculate total balance
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
 
   return (
-    <div className="customer-dashboard-container">
-      <h2>Customer Dashboard</h2>
-      <p>Welcome to your dashboard! Here you can manage your accounts, view transactions, and more.</p>
+    <div className={`customer-dashboard-container py-5 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
+      <div className="container">
+        <h2 className="mb-4">Customer Dashboard</h2>
+        <p className="lead">Welcome to your dashboard! Here you can manage your accounts, view transactions, and more.</p>
 
-      {/* Display Accounts and Balances */}
-      <div className="mb-4 accounts-section">
-        <h3>Your Accounts</h3>
-        {loadingAccounts ? (
-          <div className="d-flex justify-content-center">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading accounts...</span>
+        {/* Display Accounts and Balances */}
+        <div className="mb-4">
+          <h3>Your Accounts</h3>
+          {loadingAccounts ? (
+            <div className="d-flex justify-content-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading accounts...</span>
+              </div>
             </div>
-          </div>
-        ) : accountError ? (
-          <div className="alert alert-danger" role="alert">{accountError}</div>
-        ) : accounts.length > 0 ? (
-          <>
-            <div className="list-group">
-              {accounts.map((account) => (
-                <div key={account.accountNumber} className="list-group-item d-flex justify-content-between align-items-center account-item">
-                  <div>
-                    <strong>Account Number:</strong> {account.accountNumber}
-                    <br />
-                    <small className="text-muted">Type: {account.accountType}</small>
-                  </div>
-                  <span className="badge bg-success rounded-pill balance-badge">Balance: ${account.balance}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 total-balance">
-              <strong>Total Balance: ${totalBalance.toFixed(2)}</strong>
-            </div>
-          </>
-        ) : (
-          <div className="alert alert-info" role="alert">No accounts available.</div>
-        )}
-      </div>
+          ) : accountError ? (
+            <div className="alert alert-danger" role="alert">{accountError}</div>
+          ) : accounts.length > 0 ? (
+            <>
+              <ul className="list-group">
+                {accounts.map((account) => (
+                  <li key={account.accountNumber} className={`list-group-item d-flex justify-content-between align-items-center ${isDark ? 'bg-secondary text-light' : ''}`}>
+                    <div>
+                      <strong>Account Number:</strong> {account.accountNumber}
+                      <br />
+                      <small className="text-muted">Type: {account.accountType}</small>
+                    </div>
+                    <span className="badge bg-success rounded-pill">Balance: {account.balance}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-3">
+                <strong>Total Balance: <span className="text-success">${totalBalance.toFixed(2)}</span></strong>
+              </div>
+            </>
+          ) : (
+            <div className="alert alert-info" role="alert">No accounts available.</div>
+          )}
+        </div>
 
-      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
-        <div className="col">
-          <div className="card shadow h-100 dashboard-card">
-            <div className="card-body">
-              <h5 className="card-title"><i className="bi bi-list-ul me-2"></i>View Transactions</h5>
-              <p className="card-text">Check your recent account activity and transaction history.</p>
-              <Link to="/customer/transactions" className="btn btn-primary dashboard-button">View Details</Link>
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+          <div className="col">
+            <div className={`card shadow h-100 ${isDark ? 'bg-dark text-light' : 'bg-white text-dark'}`}>
+              <div className="card-body">
+                <h5 className="card-title"><i className="bi bi-list-ul me-2 text-primary"></i>View Transactions</h5>
+                <p className="card-text">Check your recent account activity and transaction history.</p>
+                <Link to="/customer/transactions" className="btn btn-primary">View Details</Link>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="col">
-          <div className="card shadow h-100 dashboard-card">
-            <div className="card-body">
-              <h5 className="card-title"><i className="bi bi-person-lines-fill me-2"></i>Beneficiaries</h5>
-              <p className="card-text">Manage and view your list of added beneficiaries.</p>
-              <Link to="/customer/beneficiaries" className="btn btn-info text-white dashboard-button">View List</Link>
+          <div className="col">
+            <div className={`card shadow h-100 ${isDark ? 'bg-dark text-light' : 'bg-white text-dark'}`}>
+              <div className="card-body">
+                <h5 className="card-title"><i className="bi bi-person-lines-fill me-2 text-info"></i>Beneficiaries</h5>
+                <p className="card-text">Manage and view your list of added beneficiaries.</p>
+                <Link to="/customer/beneficiaries" className="btn btn-info">View List</Link>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="col">
-          <div className="card shadow h-100 dashboard-card">
-            <div className="card-body">
-              <h5 className="card-title"><i className="bi bi-arrow-left-right me-2"></i>Transfer Money</h5>
-              <p className="card-text">Make secure transfers to your added beneficiaries.</p>
-              <Link to="/customer/transfer" className="btn btn-primary dashboard-button">Initiate Transfer</Link>
+          <div className="col">
+            <div className={`card shadow h-100 ${isDark ? 'bg-dark text-light' : 'bg-white text-dark'}`}>
+              <div className="card-body">
+                <h5 className="card-title"><i className="bi bi-arrow-left-right me-2 text-success"></i>Transfer Money</h5>
+                <p className="card-text">Make secure transfers to your added beneficiaries.</p>
+                <Link to="/customer/transfer" className="btn btn-success">Initiate Transfer</Link>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="col">
-          <div className="card shadow h-100 dashboard-card">
-            <div className="card-body">
-              <h5 className="card-title"><i className="bi bi-person-vcard me-2"></i>Profile</h5>
-              <p className="card-text">Manage your personal information and account details.</p>
-              <Link to="/customer/profile" className="btn btn-secondary dashboard-button">View Profile</Link>
+          <div className="col">
+            <div className={`card shadow h-100 ${isDark ? 'bg-dark text-light' : 'bg-white text-dark'}`}>
+              <div className="card-body">
+                <h5 className="card-title"><i className="bi bi-person-vcard me-2 text-secondary"></i>Profile</h5>
+                <p className="card-text">Manage your personal information and account details.</p>
+                <Link to="/customer/profile" className="btn btn-secondary">View Profile</Link>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="col">
-          <div className="card shadow h-100 dashboard-card">
-            <div className="card-body">
-              <h5 className="card-title"><i className="bi bi-key-fill me-2"></i>Change Password</h5>
-              <p className="card-text">Update your account password for enhanced security.</p>
-              <Link to="/customer/profile/change-password" className="btn btn-warning dashboard-button">Change Password</Link>
+          <div className="col">
+            <div className={`card shadow h-100 ${isDark ? 'bg-dark text-light' : 'bg-white text-dark'}`}>
+              <div className="card-body">
+                <h5 className="card-title"><i className="bi bi-key-fill me-2 text-warning"></i>Change Password</h5>
+                <p className="card-text">Update your account password for enhanced security.</p>
+                <Link to="/customer/profile/change-password" className="btn btn-warning">Change Password</Link>
+              </div>
             </div>
           </div>
+          {/* More cards can be added here */}
         </div>
-        {/* More cards can be added here */}
       </div>
     </div>
   );

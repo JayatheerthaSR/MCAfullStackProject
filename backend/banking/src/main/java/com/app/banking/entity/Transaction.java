@@ -1,7 +1,6 @@
 package com.app.banking.entity;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -15,8 +14,8 @@ public class Transaction {
     private Long transactionId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "transaction_type", nullable = false)
@@ -30,11 +29,11 @@ public class Transaction {
 
     private String description;
 
-    @Column(name = "beneficiary_account_number")
-    private String beneficiaryAccountNumber; // For transfer transactions
+    @Column(name = "receiver_account_number") // Changed from beneficiaryAccountNumber
+    private String receiverAccountNumber; // For transfer/credit transactions
 
-    @Column(name = "source_account_number") // Add this field
-    private String sourceAccountNumber;
+    @Column(name = "sender_account_number") // Changed from sourceAccountNumber
+    private String senderAccountNumber;    // For transfer/debit transactions
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -43,16 +42,28 @@ public class Transaction {
         return transactionId;
     }
 
-    public User getUser() {
-        return user;
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     public TransactionType getTransactionType() {
         return transactionType;
     }
 
+    public void setTransactionType(TransactionType transactionType) {
+        this.transactionType = transactionType;
+    }
+
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public void setAmount(BigDecimal bigDecimal) {
+        this.amount = bigDecimal;
     }
 
     public LocalDateTime getTransactionDate() {
@@ -63,39 +74,27 @@ public class Transaction {
         return description;
     }
 
-    public String getBeneficiaryAccountNumber() {
-        return beneficiaryAccountNumber;
-    }
-
-    public String getSourceAccountNumber() {
-        return sourceAccountNumber;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setTransactionType(TransactionType transactionType) {
-        this.transactionType = transactionType;
-    }
-
-    public void setAmount(BigDecimal bigDecimal) {
-        this.amount = bigDecimal;
-    }
-
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) {
-        this.beneficiaryAccountNumber = beneficiaryAccountNumber;
+    public String getReceiverAccountNumber() {
+        return receiverAccountNumber;
     }
 
-    public void setSourceAccountNumber(String sourceAccountNumber) {
-        this.sourceAccountNumber = sourceAccountNumber;
+    public void setReceiverAccountNumber(String receiverAccountNumber) {
+        this.receiverAccountNumber = receiverAccountNumber;
+    }
+
+    public String getSenderAccountNumber() {
+        return senderAccountNumber;
+    }
+
+    public void setSenderAccountNumber(String senderAccountNumber) {
+        this.senderAccountNumber = senderAccountNumber;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

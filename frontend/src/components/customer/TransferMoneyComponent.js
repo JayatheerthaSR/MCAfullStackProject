@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const TransferMoneyComponent = () => {
   const [accounts, setAccounts] = useState([]);
@@ -18,6 +20,8 @@ const TransferMoneyComponent = () => {
   const [internalRecipientAccountNumber, setInternalRecipientAccountNumber] = useState('');
   const navigate = useNavigate();
   const customerId = localStorage.getItem('userId');
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const fetchBalance = async () => {
     if (selectedAccount) {
@@ -244,16 +248,16 @@ const TransferMoneyComponent = () => {
   };
 
   return (
-    <div className="container mt-5">
+    <div className={`container mt-5 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <div className="card p-4 shadow">
-            <h2 className="mb-4 text-center">Transfer Money</h2>
+          <div className={`card p-4 shadow ${isDark ? 'bg-secondary border-secondary text-light' : 'bg-white'}`}>
+            <h2 className={`mb-4 text-center ${isDark ? 'text-primary' : 'text-primary'}`}>Transfer Money</h2>
 
             <div className="mb-3">
               <label className="form-label">Select Account to Transfer From</label>
               <select
-                className="form-control"
+                className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                 value={selectedAccount}
                 onChange={handleAccountChange}
                 required
@@ -269,12 +273,12 @@ const TransferMoneyComponent = () => {
             </div>
 
             {availableBalance !== null && (
-              <p className="mb-3 text-muted text-center">
+              <p className={`mb-3 text-muted text-center ${isDark ? 'text-light' : ''}`}>
                 Available Balance: <strong>{availableBalance}</strong>
               </p>
             )}
             {availableBalance === null && selectedAccount && (
-              <p className="mb-3 text-muted text-center">
+              <p className={`mb-3 text-muted text-center ${isDark ? 'text-light' : ''}`}>
                 Failed to fetch balance for selected account.
               </p>
             )}
@@ -286,7 +290,7 @@ const TransferMoneyComponent = () => {
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label className="form-label">Transfer Type</label>
-                <select className="form-control" onChange={handleTransferTypeChange} value={isInternalTransfer ? 'internal' : 'external'}>
+                <select className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} onChange={handleTransferTypeChange} value={isInternalTransfer ? 'internal' : 'external'}>
                   <option value="external">External Transfer</option>
                   <option value="internal">Internal Transfer</option>
                 </select>
@@ -297,7 +301,7 @@ const TransferMoneyComponent = () => {
                   <label htmlFor="internalRecipientAccountNumber" className="form-label">Recipient Account Number</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                     id="internalRecipientAccountNumber"
                     value={internalRecipientAccountNumber}
                     onChange={handleInternalRecipientChange}
@@ -308,7 +312,7 @@ const TransferMoneyComponent = () => {
                 <div className="mb-3">
                   <label htmlFor="beneficiary" className="form-label">Select Beneficiary</label>
                   <select
-                    className="form-control"
+                    className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                     id="beneficiary"
                     onChange={handleBeneficiaryChange}
                     value={selectedBeneficiary ? selectedBeneficiary.beneficiaryId : ''}
@@ -327,7 +331,7 @@ const TransferMoneyComponent = () => {
 
               {!isInternalTransfer && selectedBeneficiary && (
                 <div className="mb-3">
-                  <p className="text-info">
+                  <p className={`text-info ${isDark ? 'text-light' : ''}`}>
                     Max Transfer Limit for {selectedBeneficiary.beneficiaryName}: {selectedBeneficiary.maxTransferLimit}
                   </p>
                 </div>
@@ -337,7 +341,7 @@ const TransferMoneyComponent = () => {
                 <label htmlFor="amount" className="form-label">Amount</label>
                 <input
                   type="number"
-                  className="form-control"
+                  className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                   id="amount"
                   value={amount}
                   onChange={handleAmountChange}
@@ -352,7 +356,7 @@ const TransferMoneyComponent = () => {
               <div className="mb-3">
                 <label htmlFor="description" className="form-label">Description (Optional)</label>
                 <textarea
-                  className="form-control"
+                  className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -375,7 +379,7 @@ const TransferMoneyComponent = () => {
                 >
                   Transfer
                 </button>
-                <button type="button" onClick={handleCancel} className="btn btn-secondary">
+                <button type="button" onClick={handleCancel} className={`btn btn-secondary ${isDark ? 'btn-outline-light' : ''}`}>
                   Cancel
                 </button>
               </div>

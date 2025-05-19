@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const UpdateProfileComponent = () => {
   const [firstName, setFirstName] = useState('');
@@ -17,6 +18,8 @@ const UpdateProfileComponent = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role');
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   // OTP Verification States
   const [isEmailChanging, setIsEmailChanging] = useState(false);
@@ -153,37 +156,37 @@ const UpdateProfileComponent = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4 text-primary">{getProfileTitle()}</h2>
-      {error && <div className="alert alert-danger mb-3" role="alert">{error}</div>}
-      {successMessage && <div className="alert alert-success mb-3" role="alert">{successMessage}</div>}
+    <div className={`container mt-5 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
+      <h2 className={`mb-4 ${isDark ? 'text-primary' : 'text-primary'}`}>{getProfileTitle()}</h2>
+      {error && <div className={`alert alert-danger mb-3 ${isDark ? 'bg-dark text-light border-secondary' : ''}`} role="alert">{error}</div>}
+      {successMessage && <div className={`alert alert-success mb-3 ${isDark ? 'bg-dark text-light border-secondary' : ''}`} role="alert">{successMessage}</div>}
       {loading ? (
         <p>Loading profile information...</p>
       ) : (
-        <form onSubmit={handleSubmit} className="shadow-lg p-4 rounded">
+        <form onSubmit={handleSubmit} className={`shadow-lg p-4 rounded ${isDark ? 'bg-secondary border-secondary text-light' : 'bg-white'}`}>
           <div className="mb-3">
             <label htmlFor="firstName" className="form-label">First Name:</label>
-            <input type="text" className="form-control" id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+            <input type="text" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
           </div>
           <div className="mb-3">
             <label htmlFor="lastName" className="form-label">Last Name:</label>
-            <input type="text" className="form-control" id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+            <input type="text" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
           </div>
           <div className="mb-3">
             <label htmlFor="email" className="form-label">Email:</label>
-            <input type="email" className="form-control" id="email" value={newEmail} onChange={handleEmailChange} required />
+            <input type="email" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="email" value={newEmail} onChange={handleEmailChange} required />
             {isEmailChanging && !isOtpSent && !isNewEmailVerified && (
               <div className="mt-2">
                 <button type="button" className="btn btn-sm btn-outline-info" onClick={handleSendOtp} disabled={isOtpSent}>
                   {isOtpSent ? 'Sending OTP...' : 'Send OTP'}
                 </button>
-                <small className="form-text text-muted">Click to send OTP to your new email address.</small>
+                <small className={`form-text text-muted ${isDark ? 'text-light' : ''}`}>Click to send OTP to your new email address.</small>
               </div>
             )}
             {isEmailChanging && isOtpSent && !isNewEmailVerified && (
               <div className="mt-2">
                 <label htmlFor="otp" className="form-label">OTP:</label>
-                <input type="text" className="form-control form-control-sm" id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required />
+                <input type="text" className={`form-control form-control-sm ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} required />
                 {otpVerificationError && <div className="text-danger mt-1">{otpVerificationError}</div>}
                 <button type="button" className="btn btn-sm btn-primary mt-2" onClick={handleVerifyOtp} disabled={isOtpVerifying}>
                   {isOtpVerifying ? 'Verifying...' : 'Verify OTP'}
@@ -194,18 +197,18 @@ const UpdateProfileComponent = () => {
           </div>
           <div className="mb-3">
             <label htmlFor="phoneNumber" className="form-label">Phone Number (Optional):</label>
-            <input type="tel" className="form-control" id="phoneNumber" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+            <input type="tel" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="phoneNumber" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
           </div>
           <div className="mb-3">
             <label htmlFor="address" className="form-label">Address:</label>
-            <textarea className="form-control" id="address" value={address} onChange={(e) => setAddress(e.target.value)} rows="3" />
-            <small className="form-text text-muted">Must be between 5 and 200 characters.</small>
+            <textarea className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="address" value={address} onChange={(e) => setAddress(e.target.value)} rows="3" />
+            <small className={`form-text text-muted ${isDark ? 'text-light' : ''}`}>Must be between 5 and 200 characters.</small>
           </div>
           <div className="d-flex gap-2">
             <button type="submit" className="btn btn-primary" disabled={isEmailChanging && !isNewEmailVerified}>
               Update Profile
             </button>
-            <button onClick={() => navigate(getProfileHomeRoute())} className="btn btn-outline-secondary">
+            <button onClick={() => navigate(getProfileHomeRoute())} className={`btn btn-outline-secondary ${isDark ? 'btn-outline-light' : ''}`}>
               Cancel
             </button>
           </div>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const ChangePasswordComponent = ({ redirectPath }) => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -10,6 +11,8 @@ const ChangePasswordComponent = ({ redirectPath }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -42,16 +45,16 @@ const ChangePasswordComponent = ({ redirectPath }) => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4 text-primary">Change Password</h2>
-      {error && <div className="alert alert-danger mb-3" role="alert">{error}</div>}
-      {successMessage && <div className="alert alert-success mb-3" role="alert">{successMessage}</div>}
-      <form onSubmit={handleChangePassword} className="shadow-lg p-4 rounded">
+    <div className={`container mt-5 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
+      <h2 className={`mb-4 ${isDark ? 'text-primary' : 'text-primary'}`}>Change Password</h2>
+      {error && <div className={`alert alert-danger mb-3 ${isDark ? 'bg-dark text-light border-secondary' : ''}`} role="alert">{error}</div>}
+      {successMessage && <div className={`alert alert-success mb-3 ${isDark ? 'bg-dark text-light border-secondary' : ''}`} role="alert">{successMessage}</div>}
+      <form onSubmit={handleChangePassword} className={`shadow-lg p-4 rounded ${isDark ? 'bg-secondary border-secondary text-light' : 'bg-white'}`}>
         <div className="mb-3">
           <label htmlFor="currentPassword" className="form-label">Current Password</label>
           <input
             type="password"
-            className="form-control"
+            className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
             id="currentPassword"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
@@ -62,7 +65,7 @@ const ChangePasswordComponent = ({ redirectPath }) => {
           <label htmlFor="newPassword" className="form-label">New Password</label>
           <input
             type="password"
-            className="form-control"
+            className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
             id="newPassword"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
@@ -73,7 +76,7 @@ const ChangePasswordComponent = ({ redirectPath }) => {
           <label htmlFor="confirmNewPassword" className="form-label">Confirm New Password</label>
           <input
             type="password"
-            className="form-control"
+            className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
             id="confirmNewPassword"
             value={confirmNewPassword}
             onChange={(e) => setConfirmNewPassword(e.target.value)}
@@ -81,7 +84,7 @@ const ChangePasswordComponent = ({ redirectPath }) => {
           />
         </div>
         <button type="submit" className="btn btn-primary">Change Password</button>
-        <button onClick={() => navigate(-1)} className="btn btn-outline-secondary ms-2">Cancel</button>
+        <button onClick={() => navigate(-1)} className={`btn btn-outline-secondary ms-2 ${isDark ? 'btn-outline-light' : ''}`}>Cancel</button>
       </form>
     </div>
   );

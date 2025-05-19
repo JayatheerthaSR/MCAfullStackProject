@@ -2,7 +2,8 @@ package com.app.banking.controller;
 
 import com.app.banking.entity.Transaction;
 import com.app.banking.entity.User;
-//import com.app.banking.payload.response.AdminProfileResponse;
+import com.app.banking.payload.response.AdminProfileResponse;
+import com.app.banking.payload.response.TransactionResponse;
 import com.app.banking.service.AdminService; // Assuming you have an AdminService
 import com.app.banking.service.TransactionService;
 import com.app.banking.service.UserService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admins/{adminId}")
@@ -98,8 +100,13 @@ public class AdminController {
     }
 
     @GetMapping("/transactions")
-    public ResponseEntity<List<Transaction>> getAllTransactions() {
-        List<Transaction> transactions = transactionService.getAllTransactions();
-        return ResponseEntity.ok(transactions);
+    public ResponseEntity<TransactionResponse> getAllTransactions(@PathVariable Long adminId) {
+        List<TransactionResponse> allTransactions = transactionService.getAllTransactions();
+        // Now you can work with the list of TransactionResponse objects
+        // You might need to adjust the subsequent mapping logic accordingly
+        TransactionResponse response = new TransactionResponse(allTransactions.stream()
+                .flatMap(tr -> tr.getTransactions().stream())
+                .collect(Collectors.toList()));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

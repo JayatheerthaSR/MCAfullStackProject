@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import './AddBeneficiaryComponent.css'; // Keep your custom styles if any
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const AddBeneficiaryComponent = () => {
   const [beneficiaryName, setBeneficiaryName] = useState('');
@@ -11,39 +13,41 @@ const AddBeneficiaryComponent = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const customerId = localStorage.getItem('userId'); // Assuming userId corresponds to customerId
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const handleSubmit = async (event) => {
-  event.preventDefault();
-  setError('');
-  try {
-    const response = await api.post(`/customers/${customerId}/beneficiaries`, {
-      beneficiaryName,
-      bankName,
-      accountNumber,
-      maxTransferLimit: parseFloat(maxTransferLimit) || null,
-    });
+    event.preventDefault();
+    setError('');
+    try {
+      const response = await api.post(`/customers/${customerId}/beneficiaries`, {
+        beneficiaryName,
+        bankName,
+        accountNumber,
+        maxTransferLimit: parseFloat(maxTransferLimit) || null,
+      });
 
-    if (response.status === 201) {
-      navigate('/customer/beneficiaries'); // Redirect to beneficiaries list on success
-    } else {
-      setError('Failed to add beneficiary.'); // Generic error for unexpected success responses
+      if (response.status === 201) {
+        navigate('/customer/beneficiaries'); // Redirect to beneficiaries list on success
+      } else {
+        setError('Failed to add beneficiary.'); // Generic error for unexpected success responses
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setError(error.response.data); // Display the error message from the backend
+      } else if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message); // Display specific error message from backend
+      } else {
+        setError('Failed to add beneficiary. Please check your connection or try again.');
+      }
     }
-  } catch (error) {
-    if (error.response && error.response.status === 409) {
-      setError(error.response.data); // Display the error message from the backend
-    } else if (error.response && error.response.data && error.response.data.message) {
-      setError(error.response.data.message); // Display specific error message from backend
-    } else {
-      setError('Failed to add beneficiary. Please check your connection or try again.');
-    }
-  }
-};
+  };
 
   return (
-    <div className="container mt-5">
+    <div className={`container mt-5 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <div className="card p-4">
+          <div className={`card p-4 ${isDark ? 'bg-secondary border-secondary text-light' : 'bg-white'}`}>
             <h2 className="mb-4">Add New Beneficiary</h2>
             {error && <div className="alert alert-danger" role="alert">{error}</div>}
             <form onSubmit={handleSubmit}>
@@ -51,7 +55,7 @@ const AddBeneficiaryComponent = () => {
                 <label htmlFor="beneficiaryName" className="form-label">Beneficiary Name:</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                   id="beneficiaryName"
                   value={beneficiaryName}
                   onChange={(e) => setBeneficiaryName(e.target.value)}
@@ -62,7 +66,7 @@ const AddBeneficiaryComponent = () => {
                 <label htmlFor="bankName" className="form-label">Bank Name:</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                   id="bankName"
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
@@ -73,7 +77,7 @@ const AddBeneficiaryComponent = () => {
                 <label htmlFor="accountNumber" className="form-label">Account Number:</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                   id="accountNumber"
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
@@ -84,7 +88,7 @@ const AddBeneficiaryComponent = () => {
                 <label htmlFor="maxTransferLimit" className="form-label">Max Transfer Limit:</label>
                 <input
                   type="number"
-                  className="form-control"
+                  className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                   id="maxTransferLimit"
                   value={maxTransferLimit}
                   onChange={(e) => setMaxTransferLimit(e.target.value)}
@@ -97,7 +101,7 @@ const AddBeneficiaryComponent = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/customer/beneficiaries')}
-                  className="btn btn-secondary"
+                  className={`btn btn-secondary ${isDark ? 'btn-outline-light' : ''}`}
                 >
                   Cancel
                 </button>

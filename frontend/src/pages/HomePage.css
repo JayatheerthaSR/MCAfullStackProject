@@ -1,25 +1,6 @@
 /* src/pages/HomePage.css */
 
-.homepage-hero {
-  /* Adjust hero background with a subtle overlay if needed */
-  /* background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('your-hero-image.jpg');
-  background-size: cover;
-  background-position: center; */
-}
-
 .homepage-hero h1 {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Example modern font */
-}
-
-.homepage-hero .btn-light {
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.homepage-hero .btn-outline-light {
-  border-width: 2px;
-}
-
-.card-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-weight: 600;
-  color: #007bff; /* Example accent color */
 }

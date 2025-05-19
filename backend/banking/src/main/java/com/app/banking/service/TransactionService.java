@@ -77,11 +77,12 @@ public class TransactionService {
         return item;
     }
 
-    public List<TransactionResponse> getAllTransactions() {
-        return transactionRepository.findAll().stream()
+    public TransactionResponse getAllTransactions() {
+        List<Transaction> allTransactions = transactionRepository.findAll();
+        List<TransactionResponse.TransactionItem> transactionItems = allTransactions.stream()
                 .map(this::convertToTransactionItem)
-                .map(item -> new TransactionResponse(BigDecimal.ZERO, List.of(item)))
                 .collect(Collectors.toList());
+        return new TransactionResponse(transactionItems);
     }
 
     public List<TransactionResponse> getTransactionsByUserIdOrderByDateDescending(Long userId) {
@@ -90,7 +91,9 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository.findByUser_UserIdOrderByTransactionDateDesc(user.getUserId());
         return transactions.stream()
                 .map(this::convertToTransactionItem)
-                .map(item -> new TransactionResponse(BigDecimal.ZERO, List.of(item)))
+                .collect(Collectors.toList())
+                .stream() // New stream to wrap in a single TransactionResponse
+                .map(TransactionResponse::new)
                 .collect(Collectors.toList());
     }
 
@@ -100,7 +103,9 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository.findByUser_UserIdOrderByCreatedAtDesc(user.getUserId());
         return transactions.stream()
                 .map(this::convertToTransactionItem)
-                .map(item -> new TransactionResponse(BigDecimal.ZERO, List.of(item)))
+                .collect(Collectors.toList())
+                .stream() // New stream to wrap in a single TransactionResponse
+                .map(TransactionResponse::new)
                 .collect(Collectors.toList());
     }
 }

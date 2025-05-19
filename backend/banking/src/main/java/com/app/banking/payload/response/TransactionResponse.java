@@ -1,30 +1,24 @@
 package com.app.banking.payload.response;
 
 import com.app.banking.entity.TransactionType;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TransactionResponse {
-    private BigDecimal initialBalance;
     private List<TransactionItem> transactions;
+    private BigDecimal accountBalance;
 
     public TransactionResponse() {
     }
 
-    public TransactionResponse(BigDecimal initialBalance2, List<TransactionItem> transactions) {
-        this.initialBalance = initialBalance2;
+    public TransactionResponse(List<TransactionItem> transactions) {
         this.transactions = transactions;
     }
 
-    public BigDecimal getInitialBalance() {
-        return initialBalance;
-    }
-
-    public void setInitialBalance(BigDecimal initialBalance) {
-        this.initialBalance = initialBalance;
+    public TransactionResponse(BigDecimal accountBalance, List<TransactionItem> transactions) {
+        this.accountBalance = accountBalance;
+        this.transactions = transactions;
     }
 
     public List<TransactionItem> getTransactions() {
@@ -33,6 +27,14 @@ public class TransactionResponse {
 
     public void setTransactions(List<TransactionItem> transactions) {
         this.transactions = transactions;
+    }
+
+    public BigDecimal getAccountBalance() {
+        return accountBalance;
+    }
+
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
     }
 
     public static class TransactionItem {

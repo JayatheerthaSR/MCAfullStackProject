@@ -1,13 +1,114 @@
-body {
+body.light {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa; /* Light background */
+  color: #212529; /* Dark text */
+}
+
+body.dark {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #343a40; /* Dark background */
+  color: #f8f9fa; /* Light text */
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Navbar styles */
+.navbar.light {
+  background-color: #e9ecef;
+  color: #212529;
+}
+
+.navbar.dark {
+  background-color: #212529;
+  color: #f8f9fa;
+}
+
+/* Card styles */
+.card.light {
+  background-color: #fff;
+  color: #212529;
+  border: 1px solid #ccc;
+}
+
+.card.dark {
+  background-color: #444;
+  color: #f8f9fa;
+  border: 1px solid #666;
+}
+
+/* Button styles */
+.btn.light {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.btn.dark {
+  background-color: #6c757d;
+  color: #fff;
+  border-color: #6c757d;
+}
+
+.btn.light:hover,
+.btn.light:focus {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn.dark:hover,
+.btn.dark:focus {
+  background-color: #495057;
+  border-color: #495057;
+}
+
+/* Table styles */
+.table.light {
+  background-color: #fff;
+  color: #212529;
+  border-color: #dee2e6;
+}
+
+.table.dark {
+  background-color: #343a40;
+  color: #f8f9fa;
+  border-color: #495057;
+}
+
+.table.light th,
+.table.light td {
+  border-color: #dee2e6;
+}
+
+.table.dark th,
+.table.dark td {
+  border-color: #495057;
+}
+
+/* Form input styles */
+.form-control.light {
+  background-color: #fff;
+  color: #212529;
+  border-color: #ced4da;
+}
+
+.form-control.dark {
+  background-color: #444;
+  color: #f8f9fa;
+  border-color: #6c757d;
+}
+
+/* Add more styles for other Bootstrap components and your custom components as needed */
+/* Remember to inspect your application and add styles based on the actual class names you are using */

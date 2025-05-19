@@ -8,6 +8,7 @@ import java.util.Optional; // Import Optional
 
 @Repository
 public interface BeneficiaryRepository extends JpaRepository<Beneficiary, Long> {
+	List<Beneficiary> findByBeneficiaryNameContainingIgnoreCaseOrAccountNumberContaining(String beneficiaryName, String accountNumber);
     List<Beneficiary> findByCustomer_CustomerId(Long customerId);
     boolean existsByCustomer_CustomerIdAndAccountNumber(Long customerId, String accountNumber);
 

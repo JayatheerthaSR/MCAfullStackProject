@@ -1,0 +1,19 @@
+/* src/components/ThemeToggle.css */
+.theme-toggle {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.theme-toggle.light {
+  background-color: #fff;
+  color: #212529;
+}
+
+.theme-toggle.dark {
+  background-color: #343a40;
+  color: #f8f9fa;
+  border-color: #6c757d;
+}

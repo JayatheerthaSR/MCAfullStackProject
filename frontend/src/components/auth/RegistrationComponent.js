@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const RegistrationComponent = () => {
   const [registrationData, setRegistrationData] = useState({
@@ -25,6 +26,8 @@ const RegistrationComponent = () => {
   const [verificationError, setVerificationError] = useState('');
   const [verificationLoading, setVerificationLoading] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -110,12 +113,12 @@ const RegistrationComponent = () => {
   };
 
   return (
-    <div className="container mt-5">
+    <div className={`container mt-5 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <div className="card shadow">
+          <div className={`card shadow ${isDark ? 'bg-secondary border-secondary text-light' : 'bg-white'}`}>
             <div className="card-body p-4">
-              <h2 className="text-center mb-4">Register</h2>
+              <h2 className={`text-center mb-4 ${isDark ? 'text-primary' : 'text-primary'}`}>Register</h2>
               {error && <div className="alert alert-danger">{error}</div>}
               {message && <div className="alert alert-info">{message}</div>}
 
@@ -123,13 +126,13 @@ const RegistrationComponent = () => {
                 <form onSubmit={handleInitialRegistration}>
                   <div className="mb-3">
                     <label htmlFor="username" className="form-label">Username:</label>
-                    <input type="text" className="form-control" id="username" name="username" value={registrationData.username} onChange={handleChange} required />
+                    <input type="text" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="username" name="username" value={registrationData.username} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">Password:</label>
                     <input
                       type="password"
-                      className="form-control"
+                      className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                       id="password"
                       name="password"
                       value={registrationData.password}
@@ -142,7 +145,7 @@ const RegistrationComponent = () => {
                     <label htmlFor="confirmPassword" className="form-label">Confirm Password:</label>
                     <input
                       type="password"
-                      className="form-control"
+                      className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                       id="confirmPassword"
                       name="confirmPassword"
                       value={registrationData.confirmPassword}
@@ -155,25 +158,25 @@ const RegistrationComponent = () => {
                   </div>
                   <div className="mb-3">
                     <label htmlFor="firstName" className="form-label">First Name:</label>
-                    <input type="text" className="form-control" id="firstName" name="firstName" value={registrationData.firstName} onChange={handleChange} required />
+                    <input type="text" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="firstName" name="firstName" value={registrationData.firstName} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label htmlFor="lastName" className="form-label">Last Name:</label>
-                    <input type="text" className="form-control" id="lastName" name="lastName" value={registrationData.lastName} onChange={handleChange} required />
+                    <input type="text" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="lastName" name="lastName" value={registrationData.lastName} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">Email:</label>
-                    <input type="email" className="form-control" id="email" name="email" value={registrationData.email} onChange={handleChange} required />
+                    <input type="email" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="email" name="email" value={registrationData.email} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label htmlFor="address" className="form-label">Address:</label>
-                    <input type="text" className="form-control" id="address" name="address" value={registrationData.address} onChange={handleChange} required />
+                    <input type="text" className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="address" name="address" value={registrationData.address} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label htmlFor="phone" className="form-label">Phone Number (Optional):</label>
                     <input
                       type="tel"
-                      className="form-control"
+                      className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                       id="phone"
                       name="phone"
                       value={phone}
@@ -182,7 +185,7 @@ const RegistrationComponent = () => {
                   </div>
                   <div className="mb-3">
                     <label htmlFor="role" className="form-label">Role:</label>
-                    <select className="form-select" id="role" name="role" value={registrationData.role} onChange={handleChange}>
+                    <select className={`form-select ${isDark ? 'bg-dark text-light border-secondary' : ''}`} id="role" name="role" value={registrationData.role} onChange={handleChange}>
                       <option value="CUSTOMER">Customer</option>
                       <option value="ADMIN">Admin</option>
                     </select>
@@ -196,20 +199,20 @@ const RegistrationComponent = () => {
                       {loading ? 'Registering...' : 'Register'}
                     </button>
                   </div>
-                  <p className="mt-3 text-center">
-                    Already have an account? <Link to="/login">Login</Link>
+                  <p className={`mt-3 text-center ${isDark ? 'text-light' : 'text-muted'}`}>
+                    Already have an account? <Link to="/login" className={`${isDark ? 'text-info' : 'text-primary'}`}>Login</Link>
                   </p>
                 </form>
               ) : (
                 <div>
-                  <h3 className="text-center mb-4">Verify OTP</h3>
+                  <h3 className={`text-center mb-4 ${isDark ? 'text-primary' : 'text-primary'}`}>Verify OTP</h3>
                   {verificationError && <div className="alert alert-danger">{verificationError}</div>}
                   <form onSubmit={handleVerifyOTP}>
                     <div className="mb-3">
                       <label htmlFor="otp" className="form-label">Enter OTP:</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${isDark ? 'bg-dark text-light border-secondary' : ''}`}
                         id="otp"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
@@ -222,7 +225,7 @@ const RegistrationComponent = () => {
                       </button>
                     </div>
                   </form>
-                  <p className="mt-3 text-center">
+                  <p className={`mt-3 text-center ${isDark ? 'text-light' : 'text-muted'}`}>
                     Didn't receive the OTP? {/* Add a "Resend OTP" link/button here if needed */}
                   </p>
                 </div>

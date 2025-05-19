@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const ViewTransactionsComponent = () => {
   const [transactions, setTransactions] = useState([]);
@@ -13,6 +14,8 @@ const ViewTransactionsComponent = () => {
   const userId = localStorage.getItem('userId');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -35,7 +38,7 @@ const ViewTransactionsComponent = () => {
 
         const processedTransactions = response.data.transactions.map(transaction => ({
           ...transaction,
-          creditDebit: parseFloat(transaction.amount) > 0 ? 'Credit' : 'Debit', // Convert to number for comparison
+          creditDebit: parseFloat(transaction.amount) > 0 ? 'Credit' : 'Debit',
         }));
         setTransactions(processedTransactions);
 
@@ -67,6 +70,7 @@ const ViewTransactionsComponent = () => {
         transaction.creditDebit,
         transaction.transactionId,
       ]),
+      theme: isDark ? 'dark' : 'striped',
     });
     doc.save('transactions.pdf');
   };
@@ -87,7 +91,7 @@ const ViewTransactionsComponent = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className={`container mt-4 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
       <h2 className="mb-3">Your Transactions</h2>
       {error && (
         <div className="alert alert-danger" role="alert">
@@ -99,36 +103,40 @@ const ViewTransactionsComponent = () => {
           No transactions found.
         </div>
       ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th className="text-end">Amount</th>
-              <th>Credit/Debit</th>
-              <th>Transaction ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((transaction) => (
-              <tr key={transaction.transactionId}>
-                <td>{transaction.date}</td>
-                <td>{transaction.description}</td>
-                <td className={`text-end ${parseFloat(transaction.amount) < 0 ? 'text-danger' : 'text-success'}`}>{transaction.amount}</td> {/* parseFloat here */}
-                <td>{transaction.creditDebit}</td>
-                <td>{transaction.transactionId}</td>
+        <div className="table-responsive mb-3"> {/* Added mb-3 for spacing */}
+          <table className={`table table-striped ${isDark ? 'table-dark' : 'table-light'}`}>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th className="text-end">Amount</th>
+                <th>Credit/Debit</th>
+                <th>Transaction ID</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {transactions.map((transaction) => (
+                <tr key={transaction.transactionId}>
+                  <td>{transaction.date}</td>
+                  <td>{transaction.description}</td>
+                  <td className={`text-end ${parseFloat(transaction.amount) < 0 ? 'text-danger' : 'text-success'}`}>{transaction.amount}</td>
+                  <td>{transaction.creditDebit}</td>
+                  <td>{transaction.transactionId}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
-      <button onClick={() => navigate('../dashboard')} className="btn btn-outline-secondary me-2">Back to Dashboard</button>
-      {transactions.length > 0 && (
-        <>
-          <button onClick={downloadPdf} className="btn btn-outline-primary me-2">Download as PDF</button>
-          <button onClick={downloadExcel} className="btn btn-outline-success">Download as Excel</button>
-        </>
-      )}
+      <div className="d-flex justify-content-between align-items-center">
+        <button onClick={() => navigate('../dashboard')} className={`btn btn-outline-secondary ${isDark ? 'btn-outline-light' : ''}`}>Back to Dashboard</button>
+        {transactions.length > 0 && (
+          <div>
+            <button onClick={downloadPdf} className={`btn btn-outline-primary me-2 ${isDark ? 'btn-outline-light' : ''}`}>Download as PDF</button>
+            <button onClick={downloadExcel} className={`btn btn-outline-success ${isDark ? 'btn-outline-light' : ''}`}>Download as Excel</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import api from '../../api';
 import { useNavigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { ThemeContext } from '../../contexts/ThemeContext';
 
 const BeneficiaryListComponent = () => {
   const [beneficiaries, setBeneficiaries] = useState([]);
@@ -8,6 +10,8 @@ const BeneficiaryListComponent = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const customerId = localStorage.getItem('userId'); // Assuming userId corresponds to customerId
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const fetchBeneficiaries = async () => {
@@ -27,50 +31,54 @@ const BeneficiaryListComponent = () => {
   }, [customerId]);
 
   if (loading) {
-    return <div className="spinner-border text-primary" role="status">
-      <span className="visually-hidden">Loading beneficiaries...</span>
+    return <div className={`d-flex justify-content-center mt-5 ${isDark ? 'text-light' : ''}`}>
+      <div className={`spinner-border text-primary ${isDark ? 'border-light' : ''}`} role="status">
+        <span className="visually-hidden">Loading beneficiaries...</span>
+      </div>
     </div>;
   }
 
   if (error) {
-    return <div className="alert alert-danger" role="alert">{error}</div>;
+    return <div className={`alert alert-danger mt-3 ${isDark ? 'bg-dark text-light border-secondary' : ''}`} role="alert">{error}</div>;
   }
 
   return (
-    <div>
-      <h2>My Beneficiaries</h2>
+    <div className={`container mt-4 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
+      <h2 className="mb-4">My Beneficiaries</h2>
       {beneficiaries.length === 0 ? (
-        <div className="alert alert-info" role="alert">No beneficiaries added yet.</div>
+        <div className={`alert alert-info ${isDark ? 'bg-secondary text-light border-secondary' : ''}`} role="alert">No beneficiaries added yet.</div>
       ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Beneficiary Name</th>
-              <th>Bank Name</th>
-              <th>Account Number</th>
-              <th>Max Transfer Limit</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {beneficiaries.map((beneficiary) => (
-              <tr key={beneficiary.id}>
-                <td>{beneficiary.beneficiaryName}</td>
-                <td>{beneficiary.bankName}</td>
-                <td>{beneficiary.accountNumber}</td>
-                <td>{beneficiary.maxTransferLimit !== null ? beneficiary.maxTransferLimit : 'No Limit'}</td>
-                <td>
-                  {/* Add Bootstrap buttons for actions */}
-                  {/* Example: <button className="btn btn-sm btn-outline-danger me-2">Delete</button> */}
-                </td>
+        <div className="table-responsive">
+          <table className={`table table-striped ${isDark ? 'table-dark' : 'table-light'}`}>
+            <thead>
+              <tr>
+                <th>Beneficiary Name</th>
+                <th>Bank Name</th>
+                <th>Account Number</th>
+                <th>Max Transfer Limit</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {beneficiaries.map((beneficiary) => (
+                <tr key={beneficiary.id}>
+                  <td>{beneficiary.beneficiaryName}</td>
+                  <td>{beneficiary.bankName}</td>
+                  <td>{beneficiary.accountNumber}</td>
+                  <td>{beneficiary.maxTransferLimit !== null ? beneficiary.maxTransferLimit : 'No Limit'}</td>
+                  <td>
+                    {/* Add Bootstrap buttons for actions */}
+                    {/* Example: <button className="btn btn-sm btn-outline-danger me-2">Delete</button> */}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
-      <div className="d-flex gap-2">
+      <div className="d-flex gap-2 mt-3">
         <button className="btn btn-primary" onClick={() => navigate('/customer/beneficiaries/add')}>Add New Beneficiary</button>
-        <button onClick={() => navigate('../dashboard')} className="btn btn-outline-secondary">Back to Dashboard</button>
+        <button onClick={() => navigate('../dashboard')} className={`btn btn-outline-secondary ${isDark ? 'btn-outline-light' : ''}`}>Back to Dashboard</button>
       </div>
     </div>
   );
