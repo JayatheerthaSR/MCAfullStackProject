@@ -43,9 +43,10 @@ public class TransactionResponse {
         private BigDecimal amount;
         private String date;
         private String description;
-        private String fromAccount;
-        private String beneficiaryAccountNumber;
-        private String beneficiaryName;
+        private String fromAccount; // Represents the sender's account for this transaction
+        private String toAccount;   // Represents the receiver's account for this transaction
+        private String displayBeneficiaryName; // A more general name for the counterparty (e.g., beneficiary name or sender's account if it's a credit)
+
 
         public TransactionItem(com.app.banking.entity.Transaction transaction) {
             this.transactionId = transaction.getTransactionId();
@@ -54,12 +55,27 @@ public class TransactionResponse {
             this.date = transaction.getTransactionDate() != null ?
                     transaction.getTransactionDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null;
             this.description = transaction.getDescription();
-            this.beneficiaryAccountNumber = transaction.getBeneficiaryAccountNumber();
-            this.fromAccount = transaction.getSourceAccountNumber();
-            this.beneficiaryName = transaction.getBeneficiaryAccountNumber() != null ?
-                    transaction.getBeneficiaryAccountNumber() : "-";
+
+            // Set fromAccount and toAccount directly from the transaction entity
+            this.fromAccount = transaction.getSenderAccountNumber();
+            this.toAccount = transaction.getReceiverAccountNumber();
+
+            // Logic for displayBeneficiaryName (counterparty)
+            if (transaction.getAmount().compareTo(BigDecimal.ZERO) < 0) { // If amount is negative (debit)
+                // This transaction is money *leaving* the customer's account.
+                // The beneficiary is the receiver.
+                this.displayBeneficiaryName = transaction.getReceiverAccountNumber();
+                // You might fetch actual beneficiary name from a Beneficiary entity if available,
+                // but for now, using the account number is a good default.
+            } else { // If amount is positive (credit)
+                // This transaction is money *entering* the customer's account.
+                // The "beneficiary" from the *sender's* perspective is your account,
+                // so the counterparty is the sender.
+                this.displayBeneficiaryName = transaction.getSenderAccountNumber();
+            }
         }
 
+        // Standard getters and setters for all fields
         public Long getTransactionId() {
             return transactionId;
         }
@@ -108,20 +124,25 @@ public class TransactionResponse {
             this.fromAccount = fromAccount;
         }
 
-        public String getBeneficiaryAccountNumber() {
-            return beneficiaryAccountNumber;
+        public String getToAccount() { // New getter for 'toAccount'
+            return toAccount;
         }
 
-        public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) {
-            this.beneficiaryAccountNumber = beneficiaryAccountNumber;
+        public void setToAccount(String toAccount) { // New setter for 'toAccount'
+            this.toAccount = toAccount;
         }
 
-        public String getBeneficiaryName() {
-            return beneficiaryName;
+        // Changed beneficiaryAccountNumber to a more generic displayBeneficiaryName
+        public String getDisplayBeneficiaryName() {
+            return displayBeneficiaryName;
         }
 
-        public void setBeneficiaryName(String beneficiaryName) {
-            this.beneficiaryName = beneficiaryName;
+        public void setDisplayBeneficiaryName(String displayBeneficiaryName) {
+            this.displayBeneficiaryName = displayBeneficiaryName;
         }
+
+        // Removed the old get/setBeneficiaryAccountNumber and get/setBeneficiaryName
+        // that were directly linked to the Transaction entity's fields.
+        // The idea is to make 'displayBeneficiaryName' a consolidated field for the counterparty.
     }
 }

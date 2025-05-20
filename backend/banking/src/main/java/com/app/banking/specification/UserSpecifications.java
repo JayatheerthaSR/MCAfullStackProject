@@ -3,8 +3,6 @@ package com.app.banking.specification;
 import com.app.banking.entity.User;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.Predicate;
-
 public class UserSpecifications {
 
     public static Specification<User> hasUsername(String username) {

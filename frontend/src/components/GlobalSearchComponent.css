@@ -1,0 +1,177 @@
+/* src/components/GlobalSearchComponent.css */
+
+/* Global Search Component Wrapper for Navbar */
+.global-search-wrapper {
+  position: relative;
+  width: 40px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Expanded state for the wrapper */
+.global-search-wrapper.is-active {
+  width: 200px;
+  max-width: 250px;
+}
+
+/* Input field styling (form-control) */
+.global-search-wrapper .form-control {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+}
+
+/* Input field when active (expanded state) */
+.global-search-wrapper.is-active .form-control {
+  width: auto;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  opacity: 1;
+  pointer-events: auto;
+  flex-grow: 1;
+}
+
+/* Ensure the input-group layout behaves as expected */
+.global-search-wrapper .input-group {
+    flex-wrap: nowrap;
+}
+
+/* Specific styling for the search button (always visible) */
+.global-search-wrapper .input-group-sm .btn {
+    height: calc(1.8125rem + 2px);
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+    margin-left: -1px;
+
+    /* --- Changes start here --- */
+    background-color: transparent; /* Make background transparent */
+    border-color: transparent; /* Make border transparent */
+    color: var(--bs-navbar-color); /* Inherit text color from navbar links (Bootstrap 5 custom property) */
+    /* Add transition for smoother color changes on hover/focus if needed */
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Hover state for the button */
+.global-search-wrapper .input-group-sm .btn:hover {
+    color: var(--bs-navbar-hover-color); /* Use Bootstrap's hover color for links */
+    background-color: rgba(var(--bs-light-rgb), 0.1); /* Slightly visible background on hover for light theme */
+    border-color: transparent;
+}
+
+/* Active/Focus state for the button */
+.global-search-wrapper .input-group-sm .btn:focus,
+.global-search-wrapper .input-group-sm .btn:active {
+    outline: none; /* Remove default focus outline */
+    box-shadow: none; /* Remove default box shadow */
+    color: var(--bs-navbar-active-color); /* Use Bootstrap's active color for links */
+    background-color: rgba(var(--bs-light-rgb), 0.2); /* Slightly more visible background */
+}
+
+/* Dark mode specific adjustments for the button */
+html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn {
+    color: var(--bs-navbar-dark-color); /* Bootstrap 5 dark mode navbar link color */
+}
+
+html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:hover {
+    color: var(--bs-navbar-dark-hover-color); /* Dark mode hover color */
+    background-color: rgba(var(--bs-dark-rgb), 0.2); /* Slightly visible dark background on hover */
+}
+
+html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:focus,
+html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:active {
+    color: var(--bs-navbar-dark-active-color); /* Dark mode active color */
+    background-color: rgba(var(--bs-dark-rgb), 0.3); /* Slightly more visible dark background */
+}
+
+/* --- Changes end here --- */
+
+
+/* Search results and error dropdown styles */
+.search-results-dropdown,
+.search-error-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--bs-border-color);
+  padding: 0.25rem 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Show dropdowns when the search wrapper is active */
+.global-search-wrapper.is-active .search-results-dropdown,
+.global-search-wrapper.is-active .search-error-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* Common list group item styling within dropdown */
+.search-results-dropdown .list-group-item {
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-left: none;
+  border-right: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.search-results-dropdown .list-group-item:first-child {
+  border-top: none;
+}
+
+.search-results-dropdown .list-group-item:hover {
+  background-color: var(--bs-tertiary-bg);
+}
+
+/* Text styling within search results items */
+.search-result-item strong {
+    font-size: 0.8em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    line-height: 1.2;
+}
+
+.search-result-item small {
+    font-size: 0.7em;
+    display: block;
+}
+
+/* Dark mode specific adjustments for dropdown list items */
+html[data-bs-theme="dark"] .search-results-dropdown .list-group-item {
+  background-color: var(--bs-dark);
+  color: var(--bs-light);
+  border-color: var(--bs-border-color);
+}
+
+html[data-bs-theme="dark"] .search-results-dropdown .list-group-item:hover {
+  background-color: var(--bs-gray-700);
+}
+
+html[data-bs-theme="dark"] .search-results-dropdown .dropdown-header {
+    color: var(--bs-gray-400);
+}
+
+/* Adjustments for the spinner to be centered */
+.spinner-border-sm {
+    margin: 0 auto;
+    display: block;
+}

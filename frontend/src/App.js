@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
-import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom'; // Ensure BrowserRouter is imported
+import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import LoginComponent from './components/auth/LoginComponent';
 import RegistrationComponent from './components/auth/RegistrationComponent';
 import CustomerDashboard from './components/customer/CustomerDashboard';
@@ -21,12 +21,13 @@ import './App.css';
 import BeneficiaryListComponent from './components/customer/BeneficiaryListComponent';
 import SessionManager from './components/auth/SessionManager';
 import ChangePasswordComponent from './components/profile/ChangePasswordComponent';
-import UserManagementPage from './components/admin/UserManagementPage';
-import ChatSupport from './components/ChatSupport'; // Import the ChatSupport component
+// --- UPDATED: Renamed from UserManagementPage to UserManagementComponent ---
+import UserManagementComponent from './components/admin/UserManagementComponent';
+import ChatSupport from './components/ChatSupport';
 
 function App() {
   return (
-    <BrowserRouter> {/* Wrap your entire application with BrowserRouter */}
+    <BrowserRouter>
       <Navbar />
       <div className="container mt-4">
         <SessionManager>
@@ -52,7 +53,8 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="transactions" element={<ViewAllTransactionsComponent />} />
-              <Route path="users" element={<UserManagementPage />} />
+              {/* --- UPDATED: Using UserManagementComponent here --- */}
+              <Route path="users" element={<UserManagementComponent />} />
               <Route path="profile" element={<UserProfileComponent />} />
               <Route path="profile/update" element={<UpdateProfileComponent />} />
               <Route path="profile/change-password" element={<ChangePasswordComponent redirectPath="/admin/profile" />} />
@@ -63,7 +65,7 @@ function App() {
           </Routes>
         </SessionManager>
       </div>
-      <ChatSupport /> {/* Add the ChatSupport component here */}
+      <ChatSupport />
       <Footer />
     </BrowserRouter>
   );

@@ -11,12 +11,12 @@ import com.app.banking.payload.request.ExternalTransferRequest;
 import com.app.banking.payload.request.InternalTransferRequest;
 import com.app.banking.payload.response.AccountInfoResponse;
 import com.app.banking.payload.response.TransactionResponse;
-import com.app.banking.payload.response.UserProfileResponse; // Import UserProfileResponse
+import com.app.banking.payload.response.UserProfileResponse;
 import com.app.banking.repository.AccountRepository;
 import com.app.banking.repository.BeneficiaryRepository;
 import com.app.banking.repository.CustomerRepository;
 import com.app.banking.repository.TransactionRepository;
-import com.app.banking.repository.UserRepository; // Import UserRepository
+import com.app.banking.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +44,7 @@ public class CustomerService {
     private TransactionService transactionService;
 
     @Autowired
-    private UserRepository userRepository; // Inject UserRepository
+    private UserRepository userRepository;
 
     public List<AccountInfoResponse> getAccountsByCustomerId(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
@@ -64,7 +64,7 @@ public class CustomerService {
         Account account = new Account();
         account.setAccountNumber(accountNumber);
         account.setAccountType("SAVINGS"); // You can make this dynamic if needed
-        account.setBalance(BigDecimal.ZERO); // Using BigDecimal.ZERO
+        account.setBalance(BigDecimal.ZERO);
         account.getCustomers().add(savedCustomer);
         accountRepository.save(account);
         savedCustomer.getAccounts().add(account);
@@ -77,7 +77,9 @@ public class CustomerService {
     }
 
     public Optional<Customer> findCustomerByUserId(Long userId) {
-        return customerRepository.findById(userId);
+        // This method should ideally find by user.userId, not customerId
+        // Assuming your CustomerRepository has findByUser_UserId method
+        return customerRepository.findByUser_UserId(userId);
     }
 
     public Optional<Customer> findCustomerByAccountNumber(String accountNumber) {
@@ -135,18 +137,21 @@ public class CustomerService {
             throw new RuntimeException("Insufficient balance in source account");
         }
 
-        senderAccount.setBalance(senderAccount.getBalance().subtract(transferAmount)); // Using BigDecimal subtract
+        senderAccount.setBalance(senderAccount.getBalance().subtract(transferAmount));
         accountRepository.save(senderAccount);
 
         Transaction transactionSender = new Transaction();
-        transactionSender.setUser(senderCustomer.getUser());
+        transactionSender.setCustomer(senderCustomer); // Correct: Set Customer entity directly
         transactionSender.setTransactionType(TransactionType.INTERNAL); // Assuming this is for beneficiary transfers
-        transactionSender.setAmount(transferAmount.negate());
+        transactionSender.setAmount(transferAmount.negate()); // Debit
         transactionSender.setDescription("Transfer to " + beneficiary.getBeneficiaryName() + " (" + beneficiaryAccountNumber + "): " + description);
-        transactionSender.setBeneficiaryAccountNumber(beneficiaryAccountNumber);
+        transactionSender.setReceiverAccountNumber(beneficiaryAccountNumber); // Corrected to receiverAccountNumber
+        transactionSender.setSenderAccountNumber(sourceAccountNumber); // Added senderAccountNumber
         transactionRepository.save(transactionSender);
 
-        // Placeholder for external payment gateway interaction if needed in this method
+        // No need to create a transaction for the beneficiary here if it's an external transfer to them.
+        // If it's an internal transfer to an account within your system, then yes, create a corresponding credit transaction.
+        // Based on the method signature, this looks like a transfer to an existing beneficiary (who might or might not have an account in your system).
     }
 
     public TransactionResponse getTransactionsForCustomer(Long userId) {
@@ -183,26 +188,30 @@ public class CustomerService {
             throw new RuntimeException("Insufficient balance in source account");
         }
 
-        senderAccount.setBalance(senderAccount.getBalance().subtract(transferAmount)); // Using BigDecimal subtract
-        recipientAccount.setBalance(recipientAccount.getBalance().add(transferAmount)); // Using BigDecimal add
+        senderAccount.setBalance(senderAccount.getBalance().subtract(transferAmount));
+        recipientAccount.setBalance(recipientAccount.getBalance().add(transferAmount));
 
         accountRepository.save(senderAccount);
         accountRepository.save(recipientAccount);
 
+        // Transaction for Sender (Debit)
         Transaction transactionSender = new Transaction();
-        transactionSender.setUser(senderCustomer.getUser());
+        transactionSender.setCustomer(senderCustomer); // Correct: Set Customer entity directly
         transactionSender.setTransactionType(TransactionType.INTERNAL);
-        transactionSender.setAmount(transferAmount.negate());
+        transactionSender.setAmount(transferAmount.negate()); // Debit
         transactionSender.setDescription("Internal transfer to account: " + recipientAccountNumber + " - " + description);
-        transactionSender.setBeneficiaryAccountNumber(recipientAccountNumber);
+        transactionSender.setReceiverAccountNumber(recipientAccountNumber); // Corrected to receiverAccountNumber
+        transactionSender.setSenderAccountNumber(sourceAccountNumber); // Added senderAccountNumber
         transactionRepository.save(transactionSender);
 
+        // Transaction for Recipient (Credit)
         Transaction transactionRecipient = new Transaction();
-        transactionRecipient.setUser(recipientCustomer.getUser());
+        transactionRecipient.setCustomer(recipientCustomer); // Correct: Set Customer entity directly
         transactionRecipient.setTransactionType(TransactionType.INTERNAL);
-        transactionRecipient.setAmount(transferAmount);
-        transactionRecipient.setDescription("Internal transfer from account: " + senderAccount.getAccountNumber() + " - " + description);
-        transactionRecipient.setBeneficiaryAccountNumber(senderAccount.getAccountNumber());
+        transactionRecipient.setAmount(transferAmount); // Credit
+        transactionRecipient.setDescription("Internal transfer from account: " + sourceAccountNumber + " - " + description);
+        transactionRecipient.setReceiverAccountNumber(recipientAccountNumber); // Corrected to receiverAccountNumber
+        transactionRecipient.setSenderAccountNumber(sourceAccountNumber); // Added senderAccountNumber
         transactionRepository.save(transactionRecipient);
     }
 
@@ -231,18 +240,18 @@ public class CustomerService {
             throw new RuntimeException("Insufficient balance in source account");
         }
 
-        senderAccount.setBalance(senderAccount.getBalance().subtract(externalTransferRequest.getAmount())); // Using BigDecimal subtract
+        senderAccount.setBalance(senderAccount.getBalance().subtract(externalTransferRequest.getAmount()));
         accountRepository.save(senderAccount);
 
         Transaction transactionSender = new Transaction();
-        transactionSender.setUser(senderCustomer.getUser());
+        transactionSender.setCustomer(senderCustomer); // Correct: Set Customer entity directly
         transactionSender.setTransactionType(TransactionType.EXTERNAL);
-        transactionSender.setAmount(externalTransferRequest.getAmount().negate()); // Assuming amount in request is BigDecimal
+        transactionSender.setAmount(externalTransferRequest.getAmount().negate()); // Debit
         transactionSender.setDescription("External transfer to account: " + externalTransferRequest.getBeneficiaryAccountNumber() + " - " + externalTransferRequest.getDescription());
-        transactionSender.setBeneficiaryAccountNumber(externalTransferRequest.getBeneficiaryAccountNumber());
+        transactionSender.setReceiverAccountNumber(externalTransferRequest.getBeneficiaryAccountNumber()); // Corrected to receiverAccountNumber
+        transactionSender.setSenderAccountNumber(externalTransferRequest.getSourceAccountNumber()); // Added senderAccountNumber
         transactionRepository.save(transactionSender);
 
-        // Placeholder for external payment gateway interaction
         System.out.println("Initiating external transfer: " + externalTransferRequest);
     }
 
@@ -271,26 +280,30 @@ public class CustomerService {
             throw new RuntimeException("Insufficient balance in source account");
         }
 
-        senderAccount.setBalance(senderAccount.getBalance().subtract(internalTransferRequest.getAmount())); // Using BigDecimal subtract
-        recipientAccount.setBalance(recipientAccount.getBalance().add(internalTransferRequest.getAmount())); // Using BigDecimal add
+        senderAccount.setBalance(senderAccount.getBalance().subtract(internalTransferRequest.getAmount()));
+        recipientAccount.setBalance(recipientAccount.getBalance().add(internalTransferRequest.getAmount()));
 
         accountRepository.save(senderAccount);
         accountRepository.save(recipientAccount);
 
+        // Transaction for Sender (Debit)
         Transaction transactionSender = new Transaction();
-        transactionSender.setUser(senderCustomer.getUser());
+        transactionSender.setCustomer(senderCustomer); // Correct: Set Customer entity directly
         transactionSender.setTransactionType(TransactionType.INTERNAL);
         transactionSender.setAmount(internalTransferRequest.getAmount().negate());
         transactionSender.setDescription("Internal transfer to account: " + internalTransferRequest.getRecipientAccountNumber() + " - " + internalTransferRequest.getDescription());
-        transactionSender.setBeneficiaryAccountNumber(internalTransferRequest.getRecipientAccountNumber());
+        transactionSender.setReceiverAccountNumber(internalTransferRequest.getRecipientAccountNumber()); // Corrected to receiverAccountNumber
+        transactionSender.setSenderAccountNumber(internalTransferRequest.getSourceAccountNumber()); // Added senderAccountNumber
         transactionRepository.save(transactionSender);
 
+        // Transaction for Recipient (Credit)
         Transaction transactionRecipient = new Transaction();
-        transactionRecipient.setUser(recipientCustomer.getUser());
+        transactionRecipient.setCustomer(recipientCustomer); // Correct: Set Customer entity directly
         transactionRecipient.setTransactionType(TransactionType.INTERNAL);
         transactionRecipient.setAmount(internalTransferRequest.getAmount());
         transactionRecipient.setDescription("Internal transfer from account: " + senderAccount.getAccountNumber() + " - " + internalTransferRequest.getDescription());
-        transactionRecipient.setBeneficiaryAccountNumber(senderAccount.getAccountNumber());
+        transactionRecipient.setReceiverAccountNumber(internalTransferRequest.getRecipientAccountNumber()); // Corrected to receiverAccountNumber
+        transactionRecipient.setSenderAccountNumber(internalTransferRequest.getSourceAccountNumber()); // Added senderAccountNumber
         transactionRepository.save(transactionRecipient);
     }
 
@@ -299,7 +312,7 @@ public class CustomerService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         Customer customer = customerRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user id: " + userId));
-        List<Account> accounts = accountRepository.findByCustomers(customer); // Changed to findByCustomers
+        List<Account> accounts = accountRepository.findByCustomers(customer);
         List<AccountInfoResponse> accountInfoResponses = accounts.stream()
                 .map(account -> new AccountInfoResponse(
                         account.getAccountNumber(),
@@ -320,5 +333,27 @@ public class CustomerService {
         profileResponse.setAccounts(accountInfoResponses);
 
         return profileResponse;
+    }
+
+    public boolean deleteBeneficiaryOfCustomer(Long customerId, Long beneficiaryId) {
+        // Find the beneficiary by ID
+        Optional<Beneficiary> beneficiaryOptional = beneficiaryRepository.findById(beneficiaryId);
+
+        if (beneficiaryOptional.isPresent()) {
+            Beneficiary beneficiary = beneficiaryOptional.get();
+
+            // Crucial: Verify that the beneficiary belongs to the given customerId
+            // Assuming your Customer entity has a getUserId() or getId() method for its primary key.
+            // Replace 'getUserId()' with 'getId()' if your Customer entity's ID getter is getId().
+            if (beneficiary.getCustomer().getCustomerId().equals(customerId)) { // CORRECTED LINE
+                beneficiaryRepository.delete(beneficiary);
+                return true;
+            } else {
+                // Beneficiary found but does not belong to the specified customer
+                // This could indicate a security issue or incorrect ID passed
+                throw new ResourceNotFoundException("Beneficiary not found for customer with ID: " + customerId + " or does not belong to this customer: " + beneficiaryId);
+            }
+        }
+        return false; // Beneficiary not found at all
     }
 }

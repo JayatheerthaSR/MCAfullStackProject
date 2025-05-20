@@ -1,10 +1,10 @@
-// src/components/admin/UserManagementPage.js
+// src/components/admin/UserManagementComponent.js
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../../api'; // Adjust the path to your api.js file
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
-const UserManagementPage = () => {
+const UserManagementComponent = () => {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
@@ -13,11 +13,14 @@ const UserManagementPage = () => {
   const [usernameFilter, setUsernameFilter] = useState('');
   const [emailFilter, setEmailFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
-  const [isActiveFilter, setIsActiveFilter] = useState('');
+  const [isActiveFilter, setIsActiveFilter] = useState(''); // Holds '', 'true', or 'false' string from select
   const [editingRoleUserId, setEditingRoleUserId] = useState(null);
   const [newRole, setNewRole] = useState('');
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
+
+  // Get the ID of the currently logged-in user from localStorage
+  const loggedInUserId = localStorage.getItem('userId');
 
   useEffect(() => {
     fetchAllUsers();
@@ -26,9 +29,17 @@ const UserManagementPage = () => {
   const fetchAllUsers = async () => {
     setError('');
     try {
-      const response = await api.get(
-        `/admin/users?page=${page}&size=${pageSize}&username=${usernameFilter}&email=${emailFilter}&role=${roleFilter}&isActive=${isActiveFilter}`
-      );
+      const params = new URLSearchParams();
+      params.append('page', page);
+      params.append('size', pageSize);
+
+      if (usernameFilter) params.append('username', usernameFilter);
+      if (emailFilter) params.append('email', emailFilter);
+      if (roleFilter) params.append('role', roleFilter);
+      // Append isActive only if a specific true/false value is selected
+      if (isActiveFilter !== '') params.append('isActive', isActiveFilter);
+
+      const response = await api.get(`/admin/users?${params.toString()}`);
       setUsers(response.data.content);
       setTotalElements(response.data.totalElements || 0);
     } catch (error) {
@@ -49,12 +60,13 @@ const UserManagementPage = () => {
         setRoleFilter(value);
         break;
       case 'isActive':
-        setIsActiveFilter(value === 'true' ? true : value === 'false' ? false : '');
+        // Store as string 'true', 'false', or '' for "All"
+        setIsActiveFilter(value);
         break;
       default:
         break;
     }
-    setPage(0);
+    setPage(0); // Reset to first page on filter change
   };
 
   const handlePageChange = (newPage) => {
@@ -66,15 +78,21 @@ const UserManagementPage = () => {
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
-    setPage(0);
+    setPage(0); // Reset to first page on page size change
   };
 
   const handleToggleActive = async (userId, currentActive) => {
+    // Frontend check to prevent self-deactivation/activation
+    if (userId.toString() === loggedInUserId) {
+      alert("You cannot deactivate/activate your own account!");
+      return;
+    }
     try {
+      // Send the opposite of currentActive to update status
       const response = await api.put(`/admin/users/${userId}/status?isActive=${!currentActive}`);
       if (response.status === 200) {
         setUsers(users.map(user =>
-          user.userId === userId ? { ...user, isActive: !currentActive } : user
+          user.userId === userId ? { ...user, active: !currentActive } : user
         ));
       } else {
         setError('Failed to update user status.');
@@ -85,6 +103,11 @@ const UserManagementPage = () => {
   };
 
   const handleEditRole = (userId, currentRole) => {
+    // Frontend check to prevent self-role-change
+    if (userId.toString() === loggedInUserId) {
+      alert("You cannot change the role of your own account!");
+      return;
+    }
     setEditingRoleUserId(userId);
     setNewRole(currentRole);
   };
@@ -94,13 +117,18 @@ const UserManagementPage = () => {
   };
 
   const handleSaveRole = async (userId) => {
+    // This check is already implicitly handled by handleEditRole, but good to have a redundant check
+    if (userId.toString() === loggedInUserId) {
+      alert("You cannot change the role of your own account!");
+      return;
+    }
     try {
       const response = await api.put(`/admin/users/${userId}/role?role=${newRole}`);
       if (response.status === 200) {
         setUsers(users.map(user =>
           user.userId === userId ? { ...user, role: newRole } : user
         ));
-        setEditingRoleUserId(null);
+        setEditingRoleUserId(null); // Exit edit mode
       } else {
         setError('Failed to update user role.');
       }
@@ -110,15 +138,20 @@ const UserManagementPage = () => {
   };
 
   const handleCancelEditRole = () => {
-    setEditingRoleUserId(null);
+    setEditingRoleUserId(null); // Exit edit mode
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm(`Are you sure you want to delete user with ID: ${userId}?`)) {
+    // Frontend check to prevent self-deletion
+    if (userId.toString() === loggedInUserId) {
+      alert("You cannot delete your own account!");
+      return;
+    }
+    if (window.confirm(`Are you sure you want to delete user with ID: ${userId}? This action cannot be undone.`)) {
       try {
         const response = await api.delete(`/admin/users/${userId}`);
-        if (response.status === 204) {
-          fetchAllUsers();
+        if (response.status === 204) { // 204 No Content for successful delete
+          fetchAllUsers(); // Re-fetch users to update the list
         } else {
           setError('Failed to delete user.');
         }
@@ -127,6 +160,8 @@ const UserManagementPage = () => {
       }
     }
   };
+
+  const totalPages = Math.ceil(totalElements / pageSize);
 
   return (
     <div className={`container mt-4 ${isDark ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
@@ -163,7 +198,7 @@ const UserManagementPage = () => {
       </div>
 
       {users.length === 0 ? (
-        <div className="alert alert-info">No users found.</div>
+        <div className="alert alert-info">No users found matching current filters.</div>
       ) : (
         <div className="table-responsive">
           <table className={`table table-striped ${isDark ? 'table-dark' : 'table-light'}`}>
@@ -185,31 +220,46 @@ const UserManagementPage = () => {
                   <td>{user.email}</td>
                   <td>
                     {editingRoleUserId === user.userId ? (
-                      <div>
+                      <div className="d-flex align-items-center">
                         <select
                           className={`form-select form-select-sm ${isDark ? 'bg-secondary text-light border-secondary' : ''} me-2`}
                           value={newRole}
                           onChange={handleNewRoleChange}
+                          disabled={user.userId.toString() === loggedInUserId}
                         >
                           <option value="CUSTOMER">Customer</option>
                           <option value="ADMIN">Admin</option>
                         </select>
-                        <button className="btn btn-sm btn-success me-1" onClick={() => handleSaveRole(user.userId)}>Save</button>
-                        <button className="btn btn-sm btn-secondary" onClick={handleCancelEditRole}>Cancel</button>
+                        <button className="btn btn-sm btn-success me-1" onClick={() => handleSaveRole(user.userId)} disabled={user.userId.toString() === loggedInUserId}>Save</button>
+                        <button className="btn btn-sm btn-secondary" onClick={handleCancelEditRole} disabled={user.userId.toString() === loggedInUserId}>Cancel</button>
                       </div>
                     ) : (
                       <span>{user.role}</span>
                     )}
                   </td>
-                  <td>{user.isActive ? <span className="text-success">Yes</span> : <span className="text-danger">No</span>}</td>
+                  <td>{user.active ? <span className="text-success">Yes</span> : <span className="text-danger">No</span>}</td>
                   <td>
-                    <button className={`btn btn-sm ${user.isActive ? 'btn-danger' : 'btn-success'} me-2`} onClick={() => handleToggleActive(user.userId, user.isActive)}>
-                      {user.isActive ? 'Deactivate' : 'Activate'}
+                    <button
+                      className={`btn btn-sm ${user.active ? 'btn-danger' : 'btn-success'} me-2`}
+                      onClick={() => handleToggleActive(user.userId, user.active)}
+                      disabled={user.userId.toString() === loggedInUserId}
+                    >
+                      {user.active ? 'Deactivate' : 'Activate'}
                     </button>
                     {editingRoleUserId !== user.userId && (
-                      <button className="btn btn-sm btn-info me-2" onClick={() => handleEditRole(user.userId, user.role)}>Edit Role</button>
+                      <button
+                        className="btn btn-sm btn-info me-2"
+                        onClick={() => handleEditRole(user.userId, user.role)}
+                        disabled={user.userId.toString() === loggedInUserId}
+                      >
+                        Edit Role
+                      </button>
                     )}
-                    <button className="btn btn-sm btn-danger" onClick={() => handleDeleteUser(user.userId)}>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDeleteUser(user.userId)}
+                      disabled={user.userId.toString() === loggedInUserId}
+                    >
                       Delete
                     </button>
                   </td>
@@ -223,8 +273,8 @@ const UserManagementPage = () => {
       <div className="d-flex justify-content-between align-items-center mt-3">
         <button onClick={() => window.history.back()} className={`btn btn-outline-secondary ${isDark ? 'btn-outline-light' : ''}`}>Back to Dashboard</button>
         <div className="d-flex align-items-center">
-          <div className="me-3">
-            <label htmlFor="pageSizeSelect" className="form-label me-2">Items per page:</label>
+          <div className="me-3 d-flex align-items-center">
+            <label htmlFor="pageSizeSelect" className="form-label me-2 mb-0">Items per page:</label>
             <select id="pageSizeSelect" className={`form-select form-select-sm ${isDark ? 'bg-secondary text-light border-secondary' : ''}`} value={pageSize} onChange={handlePageSizeChange}>
               <option value="10">10</option>
               <option value="20">20</option>
@@ -234,13 +284,13 @@ const UserManagementPage = () => {
           <nav aria-label="User pagination">
             <ul className="pagination pagination-sm mb-0">
               <li className={`page-item ${page === 0 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => handlePageChange(page - 1)}>Previous</button>
+                <button className="page-link" onClick={() => handlePageChange(page - 1)} disabled={page === 0}>Previous</button>
               </li>
               <li className="page-item disabled">
-                <span className="page-link">Page {page + 1} of {Math.ceil(totalElements / pageSize)}</span>
+                <span className="page-link">Page {page + 1} of {totalPages}</span>
               </li>
-              <li className={`page-item ${page >= Math.ceil(totalElements / pageSize) - 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => handlePageChange(page + 1)}>Next</button>
+              <li className={`page-item ${page >= totalPages - 1 ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages - 1}>Next</button>
               </li>
             </ul>
           </nav>
@@ -250,4 +300,4 @@ const UserManagementPage = () => {
   );
 };
 
-export default UserManagementPage;
+export default UserManagementComponent;

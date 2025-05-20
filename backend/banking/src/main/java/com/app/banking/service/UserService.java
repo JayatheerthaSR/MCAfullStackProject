@@ -43,6 +43,7 @@ public class UserService {
     private final Map<String, RegistrationData> pendingRegistrations = new HashMap<>();
     private final Map<Long, UpdateEmailData> pendingEmailUpdates = new HashMap<>();
 
+    // ... (Your existing inner classes RegistrationData and UpdateEmailData)
     private static class RegistrationData {
 
         private User user;
@@ -109,6 +110,11 @@ public class UserService {
         public void setEmailVerified(boolean emailVerified) {
             this.emailVerified = emailVerified;
         }
+    }
+
+    // New: Public save method for User
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
     public void initiateUserRegistration(User user) {

@@ -1,10 +1,9 @@
 package com.app.banking.controller;
 
-import com.app.banking.entity.Transaction;
 import com.app.banking.entity.User;
 import com.app.banking.payload.response.AdminProfileResponse;
 import com.app.banking.payload.response.TransactionResponse;
-import com.app.banking.service.AdminService; // Assuming you have an AdminService
+import com.app.banking.service.AdminService;
 import com.app.banking.service.TransactionService;
 import com.app.banking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admins/{adminId}")
@@ -34,17 +32,17 @@ public class AdminController {
     private TransactionService transactionService;
 
     @Autowired
-    private AdminService adminService; // Autowire the AdminService
+    private AdminService adminService;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getAdminProfile(@PathVariable Long adminId, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<User> adminUserOptional = userService.findById(adminId); // Assuming Admin entity extends/contains User details
+        Optional<User> adminUserOptional = userService.findById(adminId);
         if (adminUserOptional.isEmpty()) {
             return new ResponseEntity<>("Admin profile not found", HttpStatus.NOT_FOUND);
         }
         User adminUser = adminUserOptional.get();
 
-        AdminProfileResponse profileResponse = new AdminProfileResponse( // Adapt to your AdminProfileResponse
+        AdminProfileResponse profileResponse = new AdminProfileResponse(
                 adminId,
                 adminUser.getFirstName(),
                 adminUser.getLastName(),
@@ -64,7 +62,6 @@ public class AdminController {
         }
         User existingAdminUser = adminUserOptional.get();
 
-        // Update the User entity
         if (updateData.containsKey("firstName")) {
             existingAdminUser.setFirstName(updateData.get("firstName"));
         }
@@ -81,7 +78,7 @@ public class AdminController {
             existingAdminUser.setAddress(updateData.get("address"));
         }
 
-        userService.save(existingAdminUser); // Assuming UserService has a save method
+        userService.save(existingAdminUser);
 
         return ResponseEntity.ok("Admin profile updated successfully");
     }
@@ -101,12 +98,11 @@ public class AdminController {
 
     @GetMapping("/transactions")
     public ResponseEntity<TransactionResponse> getAllTransactions(@PathVariable Long adminId) {
-        List<TransactionResponse> allTransactions = transactionService.getAllTransactions();
-        // Now you can work with the list of TransactionResponse objects
-        // You might need to adjust the subsequent mapping logic accordingly
-        TransactionResponse response = new TransactionResponse(allTransactions.stream()
-                .flatMap(tr -> tr.getTransactions().stream())
-                .collect(Collectors.toList()));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        // Correctly receive the single TransactionResponse object
+        TransactionResponse allTransactionsResponse = transactionService.getAllTransactions();
+
+        // The TransactionResponse object already contains the list of TransactionItems
+        // and the (dummy) account balance.
+        return new ResponseEntity<>(allTransactionsResponse, HttpStatus.OK);
     }
 }

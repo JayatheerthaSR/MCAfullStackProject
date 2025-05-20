@@ -62,4 +62,6 @@ public class Customer {
         this.accounts.remove(account);
         account.getCustomers().remove(this);
     }
+
+
 }

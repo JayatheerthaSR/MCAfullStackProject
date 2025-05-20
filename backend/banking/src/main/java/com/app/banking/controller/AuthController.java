@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.DisabledException; // Import for DisabledException
 
 import java.util.Map;
 import java.util.Optional;
@@ -137,16 +138,27 @@ public class AuthController {
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
+            // Retrieve the full User object from your UserService to check 'active' status
             User user = userService.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            Optional<Customer> customerOptional = customerService.findCustomerByUserId(user.getUserId());
-
-            if (customerOptional.isEmpty()) {
-                return new ResponseEntity<>("Customer not found for this user", HttpStatus.NOT_FOUND);
+            // --- IMPORTANT: ADD THIS CHECK FOR ACTIVE STATUS ---
+            if (!user.isActive()) {
+                // If the user is not active, throw a DisabledException or return an appropriate error
+                // This exception will be caught by the AuthenticationException handler below
+                throw new DisabledException("Your account is currently inactive. Please contact support.");
             }
-            Customer customer = customerOptional.get();
-            Long customerId = customer.getCustomerId();
+            // --- END IMPORTANT CHECK ---
+
+            Optional<Customer> customerOptional = Optional.empty();
+            // Only try to find customer if the user is a CUSTOMER role
+            if (user.getRole() == Role.CUSTOMER) {
+                customerOptional = customerService.findCustomerByUserId(user.getUserId());
+            }
+
+            // CustomerId will be null if user is not a CUSTOMER or customer not found
+            Long customerId = customerOptional.map(Customer::getCustomerId).orElse(null);
+
 
             String jwtToken = null;
             try {
@@ -161,13 +173,14 @@ public class AuthController {
                     "message", "Login successful",
                     "role", user.getRole().name(),
                     "userId", user.getUserId().toString(),
-                    "customerId", customerId.toString(),
+                    "customerId", customerId != null ? customerId.toString() : "", // Return empty string if null
                     "token", jwtToken
             ));
 
         } catch (AuthenticationException e) {
+            // This will catch DisabledException as well as BadCredentialsException etc.
             System.err.println("Authentication failed: " + e.getMessage());
-            return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED); // Return the exception message
         } catch (Exception e) {
             System.err.println("An unexpected error occurred during login: " + e.getMessage());
             e.printStackTrace();

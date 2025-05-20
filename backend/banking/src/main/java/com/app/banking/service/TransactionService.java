@@ -4,6 +4,7 @@ import com.app.banking.entity.Account;
 import com.app.banking.entity.Customer;
 import com.app.banking.entity.Transaction;
 import com.app.banking.entity.User;
+import com.app.banking.exception.ResourceNotFoundException;
 import com.app.banking.payload.response.TransactionResponse;
 import com.app.banking.repository.AccountRepository;
 import com.app.banking.repository.TransactionRepository;
@@ -32,49 +33,48 @@ public class TransactionService {
     @Lazy
     private CustomerService customerService; // Inject CustomerService
 
+    // This method takes userId, finds customer, then fetches transactions
     public TransactionResponse getTransactionsByUserId(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Customer customer = customerService.findCustomerByUserId(userId) // Assuming you have this method in CustomerService
-                .orElseThrow(() -> new RuntimeException("Customer not found for this user"));
-        List<Transaction> transactions = transactionRepository.findByUser_UserIdOrderByTransactionDateAsc(user.getUserId());
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        Customer customer = customerService.findCustomerByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user id: " + userId));
+
+        // Correctly use customer.getCustomerId() which is the ID of the Customer entity
+        List<Transaction> transactions = transactionRepository.findByCustomer_CustomerIdOrderByTransactionDateAsc(customer.getCustomerId());
 
         return buildTransactionResponse(customer, transactions);
     }
 
+    // This method is overloaded to take a Customer entity directly
     public TransactionResponse getTransactionsByUserId(Customer customer) {
-        List<Transaction> transactions = transactionRepository.findByUser_UserIdOrderByTransactionDateAsc(customer.getUser().getUserId());
+        // Use customer.getCustomerId() here as well
+        List<Transaction> transactions = transactionRepository.findByCustomer_CustomerIdOrderByTransactionDateAsc(customer.getCustomerId());
         return buildTransactionResponse(customer, transactions);
     }
 
     private TransactionResponse buildTransactionResponse(Customer customer, List<Transaction> transactions) {
-        // Fetch the user's account balance
         List<Account> userAccounts = accountRepository.findByCustomers(customer);
         if (userAccounts.isEmpty()) {
-            throw new RuntimeException("User account not found");
+            throw new ResourceNotFoundException("No accounts found for customer: " + customer.getCustomerId());
         }
-        // Assuming a user has one primary account for balance retrieval
-        BigDecimal initialBalance = userAccounts.stream().findFirst()
-                .orElseThrow(() -> new RuntimeException("No accounts found for this customer"))
-                .getBalance();
+
+        BigDecimal totalBalance = userAccounts.stream()
+                                    .map(Account::getBalance)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<TransactionResponse.TransactionItem> transactionItems = transactions.stream()
                 .map(this::convertToTransactionItem)
                 .collect(Collectors.toList());
 
-        return new TransactionResponse(initialBalance, transactionItems);
+        return new TransactionResponse(totalBalance, transactionItems);
     }
 
     private TransactionResponse.TransactionItem convertToTransactionItem(Transaction transaction) {
-        TransactionResponse.TransactionItem item = new TransactionResponse.TransactionItem(transaction);
-        if (transaction.getAmount().compareTo(BigDecimal.ZERO) > 0)  { // Credit
-            Account sourceAccount = accountRepository.findByAccountNumber(transaction.getSourceAccountNumber()).orElse(null);
-            item.setFromAccount(sourceAccount != null ? sourceAccount.getAccountNumber() : null);
-        } else { // Debit
-            Account beneficiaryAccount = accountRepository.findByAccountNumber(transaction.getBeneficiaryAccountNumber()).orElse(null);
-            item.setBeneficiaryName(beneficiaryAccount != null ? beneficiaryAccount.getAccountNumber() : "-");
-        }
-        return item;
+        // The TransactionItem constructor itself handles the logic for fromAccount, toAccount,
+        // and displayBeneficiaryName based on the Transaction entity.
+        // So, you just need to create a new instance using the constructor.
+        return new TransactionResponse.TransactionItem(transaction);
     }
 
     public TransactionResponse getAllTransactions() {
@@ -82,30 +82,46 @@ public class TransactionService {
         List<TransactionResponse.TransactionItem> transactionItems = allTransactions.stream()
                 .map(this::convertToTransactionItem)
                 .collect(Collectors.toList());
-        return new TransactionResponse(transactionItems);
+
+        // For getAllTransactions, provide a meaningful initial balance or adjust TransactionResponse constructor
+        // if a balance is not applicable for a global view.
+        return new TransactionResponse(BigDecimal.ZERO, transactionItems);
     }
 
-    public List<TransactionResponse> getTransactionsByUserIdOrderByDateDescending(Long userId) {
+    // Consolidated method for fetching transactions with sorting
+    private List<TransactionResponse.TransactionItem> getTransactionsSorted(Long userId, boolean ascending) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-        List<Transaction> transactions = transactionRepository.findByUser_UserIdOrderByTransactionDateDesc(user.getUserId());
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        Customer customer = customerService.findCustomerByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user id: " + userId));
+
+        List<Transaction> transactions;
+        if (ascending) {
+            transactions = transactionRepository.findByCustomer_CustomerIdOrderByTransactionDateAsc(customer.getCustomerId());
+        } else {
+            transactions = transactionRepository.findByCustomer_CustomerIdOrderByTransactionDateDesc(customer.getCustomerId());
+        }
+
         return transactions.stream()
                 .map(this::convertToTransactionItem)
-                .collect(Collectors.toList())
-                .stream() // New stream to wrap in a single TransactionResponse
-                .map(TransactionResponse::new)
                 .collect(Collectors.toList());
     }
 
-    public List<TransactionResponse> getTransactionsByUserIdOrderByCreatedAtDescending(Long userId) {
+    public List<TransactionResponse.TransactionItem> getTransactionsByUserIdOrderByDateDescending(Long userId) {
+        return getTransactionsSorted(userId, false);
+    }
+
+    public List<TransactionResponse.TransactionItem> getTransactionsByUserIdOrderByCreatedAtDescending(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-        List<Transaction> transactions = transactionRepository.findByUser_UserIdOrderByCreatedAtDesc(user.getUserId());
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        Customer customer = customerService.findCustomerByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found for user id: " + userId));
+
+        // Make sure findByCustomer_CustomerIdOrderByCreatedAtDesc exists in your TransactionRepository
+        List<Transaction> transactions = transactionRepository.findByCustomer_CustomerIdOrderByCreatedAtDesc(customer.getCustomerId());
+
         return transactions.stream()
                 .map(this::convertToTransactionItem)
-                .collect(Collectors.toList())
-                .stream() // New stream to wrap in a single TransactionResponse
-                .map(TransactionResponse::new)
                 .collect(Collectors.toList());
     }
 }

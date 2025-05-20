@@ -1,33 +1,72 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import ThemeToggle from '../ThemeToggle';
-import { ThemeContext } from '../../contexts/ThemeContext'; // Corrected import path
-import GlobalSearchComponent from './GlobalSearchComponent'; // Import the search component
-import ChatSupport from '../ChatSupport'; // Import the ChatSupport component
+import ThemeToggle from './ThemeToggle';
+import { ThemeContext } from '../contexts/ThemeContext';
+import GlobalSearchComponent from './GlobalSearchComponent';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-  const role = localStorage.getItem('role');
-  const token = localStorage.getItem('token');
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
+  // State to track login status and role, derived from localStorage
+  const [currentAuth, setCurrentAuth] = useState(() => ({
+    isLoggedIn: !!localStorage.getItem('token'),
+    role: localStorage.getItem('role'),
+    token: localStorage.getItem('token'),
+  }));
+
+  // Update auth state when localStorage changes or location changes
   useEffect(() => {
+    // Determine if the current route is a public route
     const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
-    setIsLoggedIn(!publicRoutes.includes(location.pathname) && !!localStorage.getItem('token'));
-  }, [location]);
+    const tokenFromStorage = localStorage.getItem('token');
+    const roleFromStorage = localStorage.getItem('role');
+
+    // A user is considered logged in if a token exists AND the route is not a public one
+    // This helps manage `isLoggedIn` state more accurately for UI components
+    const newIsLoggedIn = !!tokenFromStorage && !publicRoutes.includes(location.pathname);
+
+    setCurrentAuth({
+      isLoggedIn: newIsLoggedIn,
+      role: roleFromStorage,
+      token: tokenFromStorage,
+    });
+
+    // Listen for storage events (e.g., logout from another tab/window)
+    const handleStorageChange = (event) => {
+      if (event.key === 'token' || event.key === 'role') {
+        const updatedToken = localStorage.getItem('token');
+        const updatedRole = localStorage.getItem('role');
+        const updatedIsLoggedIn = !!updatedToken && !publicRoutes.includes(location.pathname);
+        setCurrentAuth({
+          isLoggedIn: updatedIsLoggedIn,
+          role: updatedRole,
+          token: updatedToken,
+        });
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+
+  }, [location]); // Re-run effect if location changes
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    setIsLoggedIn(false);
+    localStorage.removeItem('userId'); // Ensure userId is also cleared on logout
+    localStorage.removeItem('customerId'); // Clear customerId if present
+    setCurrentAuth({ isLoggedIn: false, role: null, token: null }); // Update state immediately
     navigate('/login');
   };
 
   return (
-    <nav className={`navbar navbar-expand-lg shadow-sm mb-4 rounded ${isDark ? 'bg-dark' : 'bg-light'} text-${isDark ? 'light' : 'dark'}`}>
+    <nav className={`navbar navbar-expand-lg shadow-sm mb-4 rounded ${isDark ? 'navbar-dark bg-dark' : 'navbar-light bg-light'}`}>
       <div className="container-fluid">
         <NavLink className="navbar-brand fw-bold" to="/">
           <i className="bi bi-bank me-2"></i>Banking App
@@ -44,19 +83,25 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul className="navbar-nav ms-auto align-items-center"> {/* Added align-items-center */}
-            {isLoggedIn && (
+          <ul className="navbar-nav ms-auto align-items-center">
+            {currentAuth.isLoggedIn && (
               <li className="nav-item">
                 <NavLink
-                  className={`nav-link ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
-                  to={role === 'CUSTOMER' ? '/customer/dashboard' : role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'}
+                  className={`nav-link ${
+                    // Highlight Dashboard link if currently on dashboard path for current role
+                    (currentAuth.role === 'CUSTOMER' && location.pathname.startsWith('/customer/dashboard')) ||
+                    (currentAuth.role === 'ADMIN' && location.pathname.startsWith('/admin/dashboard'))
+                      ? 'active'
+                      : ''
+                  }`}
+                  to={currentAuth.role === 'CUSTOMER' ? '/customer/dashboard' : currentAuth.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'}
                 >
                   <i className="bi bi-house-fill me-2"></i>Dashboard
                 </NavLink>
               </li>
             )}
 
-            {isLoggedIn && role === 'CUSTOMER' && (
+            {currentAuth.isLoggedIn && currentAuth.role === 'CUSTOMER' && (
               <>
                 <li className="nav-item">
                   <NavLink
@@ -93,36 +138,44 @@ const Navbar = () => {
               </>
             )}
 
-            {isLoggedIn && role === 'ADMIN' && (
+            {currentAuth.isLoggedIn && currentAuth.role === 'ADMIN' && (
               <>
-                <li className="nav-item">
-                  <NavLink
-                    className={`nav-link ${location.pathname.startsWith('/admin/customers') ? 'active' : ''}`}
-                    to="/admin/customers"
-                  >
-                    <i className="bi bi-people-fill me-2"></i>Customers
-                  </NavLink>
-                </li>
                 <li className="nav-item">
                   <NavLink
                     className={`nav-link ${location.pathname.startsWith('/admin/transactions') ? 'active' : ''}`}
                     to="/admin/transactions"
                   >
-                    <i className="bi bi-receipt-fill me-2"></i>All Transactions
+                    <i className="bi bi-list-ul me-2"></i>All Transactions
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink
+                    className={`nav-link ${location.pathname.startsWith('/admin/users') ? 'active' : ''}`}
+                    to="/admin/users"
+                  >
+                    <i className="bi bi-people-fill me-2"></i>Manage Users
+                  </NavLink>
+                </li>
+                 <li className="nav-item">
+                  <NavLink
+                    className={`nav-link ${location.pathname.startsWith('/admin/profile') ? 'active' : ''}`}
+                    to="/admin/profile"
+                  >
+                    <i className="bi bi-person-circle me-2"></i>Profile
                   </NavLink>
                 </li>
               </>
             )}
 
-            {isLoggedIn && (
+            {currentAuth.isLoggedIn && (
               <li className="nav-item ms-lg-2">
                 <GlobalSearchComponent />
               </li>
             )}
 
-            {isLoggedIn ? (
+            {currentAuth.isLoggedIn ? (
               <li className="nav-item ms-lg-3">
-                <button onClick={handleLogout} className={`nav-link btn btn-link text-danger ${isDark ? 'text-light' : ''}`}>
+                <button onClick={handleLogout} className={`nav-link btn btn-link ${isDark ? 'text-light' : 'text-danger'}`}>
                   <i className="bi bi-box-arrow-right me-2"></i>Logout
                 </button>
               </li>
@@ -146,7 +199,6 @@ const Navbar = () => {
           </ul>
         </div>
       </div>
-      <ChatSupport /> {/* Added the ChatSupport component here */}
     </nav>
   );
 };

@@ -21,7 +21,7 @@ const AdminDashboard = () => {
         <div className="col">
           <div className={`card shadow h-100 ${isDark ? 'bg-secondary text-light' : 'bg-white text-dark'}`}>
             <div className="card-body">
-              <h5 className="card-title"><i className="bi bi-receipt-fill me-2 text-primary"></i>View All Transactions</h5>
+              <h5 className="card-title"><i className="bi bi-list-ul me-2 text-primary"></i>View All Transactions</h5>
               <p className="card-text">See a comprehensive history of all transactions within the system.</p>
               <Link to="/admin/transactions" className="btn btn-primary">View Details</Link>
             </div>
