@@ -1,14 +1,21 @@
 package com.app.banking.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "Users")
-@NoArgsConstructor
+//@NoArgsConstructor
 public class User {
 
     @Id
@@ -52,16 +59,15 @@ public class User {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
-    @Column(name = "is_active") // Add this field
+    @Column(name = "is_active")
     @NotNull
-    private boolean isActive = true; // Default to true
+    private boolean isActive = true;
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-    // Getter and setter for isActive
     public boolean isActive() {
         return isActive;
     }
@@ -70,7 +76,6 @@ public class User {
         isActive = active;
     }
 
-    // Getters and setters for resetToken
     public String getResetToken() {
         return resetToken;
     }
@@ -87,7 +92,6 @@ public class User {
         this.resetTokenExpiry = resetTokenExpiry;
     }
 
-    // Getters and setters for other fields (rest of your existing getters and setters)
     public String getUsername() {
         return username;
     }

@@ -1,27 +1,34 @@
 package com.app.banking.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.app.banking.entity.Beneficiary;
 import com.app.banking.entity.Customer;
+import com.app.banking.exception.ResourceNotFoundException;
 import com.app.banking.payload.request.ExternalTransferRequest;
 import com.app.banking.payload.request.InternalTransferRequest;
 import com.app.banking.payload.request.TransferRequest;
 import com.app.banking.payload.response.BeneficiaryResponse;
 import com.app.banking.payload.response.TransactionResponse;
 import com.app.banking.payload.response.UserProfileResponse;
-import com.app.banking.exception.ResourceNotFoundException;
 import com.app.banking.service.CustomerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/customers/{customerId}") // Base path for this controller
+@RequestMapping("/api/customers/{customerId}")
 public class CustomerController {
 
     @Autowired
@@ -47,10 +54,8 @@ public class CustomerController {
     public ResponseEntity<List<BeneficiaryResponse>> getBeneficiaries(
             @PathVariable Long customerId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Customer customer = customerService.findCustomerByUserId(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-        // You might want to add a check here to ensure the authenticated user
-        // matches the customerId in the path for security.
+//        Customer customer = customerService.findCustomerByUserId(customerId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
         List<Beneficiary> beneficiaries = customerService.getBeneficiaries(customerId);
         List<BeneficiaryResponse> beneficiaryResponses = beneficiaries.stream()
                 .map(BeneficiaryResponse::new)
@@ -64,8 +69,6 @@ public class CustomerController {
             @AuthenticationPrincipal UserDetails userDetails) {
         Customer customer = customerService.findCustomerByUserId(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-        // You might want to add a check here to ensure the authenticated user
-        // matches the customerId in the path for security.
         TransactionResponse transactionResponse = customerService.getTransactionsForCustomer(customer.getUser().getUserId());
         return ResponseEntity.ok(transactionResponse);
     }
@@ -74,8 +77,6 @@ public class CustomerController {
     public ResponseEntity<?> getUserProfile(@PathVariable Long customerId, @AuthenticationPrincipal UserDetails userDetails) {
         Customer customer = customerService.findCustomerByUserId(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
-        // You might want to add a check here to ensure the authenticated user
-        // matches the customerId in the path for security.
         UserProfileResponse profileResponse = customerService.getCustomerProfileWithAccounts(customer.getUser().getUserId());
         return ResponseEntity.ok(profileResponse);
     }
@@ -88,53 +89,38 @@ public class CustomerController {
         Customer customer = customerService.findCustomerByUserId(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 
-        // You should also verify here that userDetails.getUsername() is indeed authorized
-        // to add a beneficiary for this customerId.
-
         newBeneficiary.setCustomer(customer);
         Beneficiary addedBeneficiary = customerService.addBeneficiary(customerId, newBeneficiary);
         return new ResponseEntity<>(addedBeneficiary, HttpStatus.CREATED);
     }
 
-    // --- NEW DELETE METHOD ---
-    @DeleteMapping("/beneficiaries/{beneficiaryId}") // Full path: /api/customers/{customerId}/beneficiaries/{beneficiaryId}
+    @DeleteMapping("/beneficiaries/{beneficiaryId}")
     public ResponseEntity<Void> deleteBeneficiary(
             @PathVariable Long customerId,
             @PathVariable Long beneficiaryId,
-            @AuthenticationPrincipal UserDetails userDetails) { // Keep for authorization checks
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            // Step 1: Verify the customer exists and matches the authenticated user
             Customer customer = customerService.findCustomerByUserId(customerId)
                     .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 
-            // Step 2: IMPORTANT SECURITY CHECK
-            // Ensure the authenticated user (from userDetails) has permission to modify
-            // the beneficiary for *this* customer. This is crucial to prevent
-            // one customer from deleting another customer's beneficiary.
-            // Example:
             if (!customer.getUser().getUsername().equals(userDetails.getUsername())) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 403 Forbidden
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
 
-            // Step 3: Attempt to delete the beneficiary through the service
-            // The service method should also verify that the beneficiary belongs to this customer.
             boolean deleted = customerService.deleteBeneficiaryOfCustomer(customerId, beneficiaryId);
 
             if (deleted) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content - success, but no content to return
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } else {
-                // This could mean the beneficiary doesn't exist or doesn't belong to the customer
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Customer or beneficiary not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            // Log the exception for debugging
             System.err.println("Error deleting beneficiary: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // 500 Internal Server Error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    // --- END NEW DELETE METHOD ---
 
     @PostMapping("/transfer")
     public ResponseEntity<?> transferMoney(

@@ -1,8 +1,7 @@
 package com.app.banking.service;
 
-import com.app.banking.entity.Role;
-import com.app.banking.entity.User;
-import com.app.banking.repository.UserRepository;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +9,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.app.banking.entity.Role;
+import com.app.banking.entity.User;
+import com.app.banking.repository.UserRepository;
 
 @Service
 public class AdminUserService {
@@ -38,7 +39,6 @@ public class AdminUserService {
         return userRepository.findById(userId)
                 .map(existingUser -> {
                     updatedUser.setUserId(userId);
-                    // Prevent overwriting the password here, handle password updates separately if needed
                     updatedUser.setPassword(existingUser.getPassword());
                     return userRepository.save(updatedUser);
                 });
@@ -63,7 +63,6 @@ public class AdminUserService {
                         user.setRole(Role.valueOf(role.toUpperCase()));
                         return userRepository.save(user);
                     } catch (IllegalArgumentException e) {
-                        // Handle invalid role
                         return null;
                     }
                 });

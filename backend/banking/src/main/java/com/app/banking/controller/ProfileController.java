@@ -1,15 +1,20 @@
 package com.app.banking.controller;
 
-import com.app.banking.entity.User;
-import com.app.banking.payload.request.UpdateProfileRequest; // Create this DTO
-import com.app.banking.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.app.banking.entity.User;
+import com.app.banking.payload.request.UpdateProfileRequest;
+import com.app.banking.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -21,7 +26,7 @@ public class ProfileController {
     @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileRequest updatedProfileRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Get logged-in username
+        String username = authentication.getName();
 
         User existingUser = userService.findUserByUsername(username);
         if (existingUser == null) {
@@ -35,13 +40,13 @@ public class ProfileController {
         updatedUser.setPhone_number(updatedProfileRequest.getPhone());
         updatedUser.setAddress(updatedProfileRequest.getAddress());
 
-        boolean emailChanged = !existingUser.getEmail().equals(updatedUser.getEmail());
+//        boolean emailChanged = !existingUser.getEmail().equals(updatedUser.getEmail());
 
         try {
-            User savedUser = userService.updateUser(existingUser, updatedUser, emailChanged);
-            return ResponseEntity.ok("Profile updated successfully"); // Or return the updated user data
+//            User savedUser = userService.updateUser(existingUser, updatedUser, emailChanged);
+            return ResponseEntity.ok("Profile updated successfully");
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage()); // For "New email address is not verified."
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

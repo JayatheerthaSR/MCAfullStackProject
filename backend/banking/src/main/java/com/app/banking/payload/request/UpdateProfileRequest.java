@@ -23,7 +23,6 @@ public class UpdateProfileRequest {
     @NotBlank
     private String address;
 
-    // Getters and setters
     public String getFirstName() {
         return firstName;
     }

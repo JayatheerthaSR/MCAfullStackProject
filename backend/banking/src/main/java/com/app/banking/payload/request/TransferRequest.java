@@ -8,15 +8,13 @@ public class TransferRequest {
     private String sourceAccountNumber;
     private BigDecimal amount;
     private String description;
-    private String beneficiaryAccountNumber; // For external transfers
-    private String recipientAccountNumber;   // For internal transfers
-    private Map<String, Object> additionalProperties; // To handle any extra data
+    private String beneficiaryAccountNumber;
+    private String recipientAccountNumber;
+    private Map<String, Object> additionalProperties;
 
-    // Default constructor
     public TransferRequest() {
     }
 
-    // Getters and Setters for all fields
     public String getTransferType() {
         return transferType;
     }

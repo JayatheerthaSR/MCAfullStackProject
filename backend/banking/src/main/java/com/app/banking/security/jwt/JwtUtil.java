@@ -1,28 +1,30 @@
 package com.app.banking.security.jwt;
 
-import com.app.banking.entity.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import com.app.banking.entity.User;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}") // Configure this in your application.properties or application.yml
+    @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration.ms}") // Configure the token expiration time (in milliseconds)
+    @Value("${jwt.expiration.ms}")
     private long jwtExpirationMs;
 
     public String generateToken(UserDetails userDetails) {
@@ -49,7 +51,6 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Helper methods to extract information from the token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

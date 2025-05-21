@@ -1,11 +1,12 @@
 package com.app.banking.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailService {
@@ -13,23 +14,19 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // A utility method to create the base MimeMessageHelper
     private MimeMessageHelper createMimeMessageHelper(MimeMessage message, String toEmail, String subject) throws MessagingException {
-        // 'false' for plain text, or simply omit the boolean argument for plain text
         MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-        helper.setFrom("Banking App <bankingappmailer@gmail.com>"); // Your 'from' email address
+        helper.setFrom("${FROM_MAIL}");
         helper.setTo(toEmail);
         helper.setSubject(subject);
         return helper;
     }
 
-    // Modified to accept firstName
     public void sendPasswordResetEmail(String toEmail, String firstName, String resetLink) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = createMimeMessageHelper(message, toEmail, "Password Reset Request for Banking App");
 
-            // Added firstName to the email content
             String emailContent = String.format("""
                 Dear %s,
 
@@ -44,12 +41,11 @@ public class EmailService {
                 The Banking App Team
 
                 © 2025 Banking App. All rights reserved.
-                """, firstName, resetLink); // Added firstName as the first argument
+                """, firstName, resetLink);
 
-            helper.setText(emailContent); // Set as plain text
+            helper.setText(emailContent);
 
             mailSender.send(message);
-            System.out.println("Password reset email sent to: " + toEmail + " for user: " + firstName + " with plain text formatting.");
 
         } catch (MessagingException e) {
             System.err.println("Failed to send password reset email to " + toEmail + " for user " + firstName + ": " + e.getMessage());
@@ -57,13 +53,11 @@ public class EmailService {
         }
     }
 
-    // Modified to accept firstName
     public void sendOTPEmail(String toEmail, String firstName, String otp) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = createMimeMessageHelper(message, toEmail, "Verify Your Email for Banking App Registration");
 
-            // Added firstName to the email content
             String emailContent = String.format("""
                 Dear %s,
 
@@ -79,26 +73,22 @@ public class EmailService {
                 The Banking App Team
 
                 © 2025 Banking App. All rights reserved.
-                """, firstName, otp); // Added firstName as the first argument
+                """, firstName, otp);
 
-            helper.setText(emailContent); // Set as plain text
+            helper.setText(emailContent);
 
             mailSender.send(message);
-            System.out.println("OTP email sent to: " + toEmail + " for user: " + firstName + " with plain text formatting.");
 
         } catch (MessagingException e) {
-            System.err.println("Failed to send OTP email to " + toEmail + " for user " + firstName + ": " + e.getMessage());
             throw new RuntimeException("Error sending OTP email", e);
         }
     }
 
-    // Modified to accept firstName
     public void sendUpdateEmailOTPEmail(String toEmail, String firstName, String otp) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = createMimeMessageHelper(message, toEmail, "Verify Your New Email for Banking App");
 
-            // Added firstName to the email content
             String emailContent = String.format("""
                 Dear %s,
 
@@ -113,12 +103,11 @@ public class EmailService {
                 The Banking App Team
 
                 © 2025 Banking App. All rights reserved.
-                """, firstName, otp); // Added firstName as the first argument
+                """, firstName, otp);
 
-            helper.setText(emailContent); // Set as plain text
+            helper.setText(emailContent);
 
             mailSender.send(message);
-            System.out.println("Update email OTP sent to: " + toEmail + " for user: " + firstName + " with plain text formatting.");
 
         } catch (MessagingException e) {
             System.err.println("Failed to send update email OTP to " + toEmail + " for user " + firstName + ": " + e.getMessage());

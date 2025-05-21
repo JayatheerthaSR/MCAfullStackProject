@@ -1,11 +1,9 @@
 package com.app.banking.controller;
 
-import com.app.banking.entity.User;
-import com.app.banking.payload.response.AdminProfileResponse;
-import com.app.banking.payload.response.TransactionResponse;
-import com.app.banking.service.AdminService;
-import com.app.banking.service.TransactionService;
-import com.app.banking.service.UserService;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -13,11 +11,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.app.banking.entity.User;
+import com.app.banking.payload.response.AdminProfileResponse;
+import com.app.banking.payload.response.TransactionResponse;
+import com.app.banking.service.TransactionService;
+import com.app.banking.service.UserService;
 
 @RestController
 @RequestMapping("/api/admins/{adminId}")
@@ -30,9 +35,6 @@ public class AdminController {
 
     @Autowired
     private TransactionService transactionService;
-
-    @Autowired
-    private AdminService adminService;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getAdminProfile(@PathVariable Long adminId, @AuthenticationPrincipal UserDetails userDetails) {
@@ -98,11 +100,8 @@ public class AdminController {
 
     @GetMapping("/transactions")
     public ResponseEntity<TransactionResponse> getAllTransactions(@PathVariable Long adminId) {
-        // Correctly receive the single TransactionResponse object
         TransactionResponse allTransactionsResponse = transactionService.getAllTransactions();
 
-        // The TransactionResponse object already contains the list of TransactionItems
-        // and the (dummy) account balance.
         return new ResponseEntity<>(allTransactionsResponse, HttpStatus.OK);
     }
 }

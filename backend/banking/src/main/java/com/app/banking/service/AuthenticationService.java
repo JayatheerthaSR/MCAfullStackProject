@@ -1,12 +1,12 @@
 package com.app.banking.service;
 
-import com.app.banking.entity.User;
-import com.app.banking.entity.Role;
-
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.app.banking.entity.Role;
+import com.app.banking.entity.User;
 
 @Service
 public class AuthenticationService {
@@ -20,18 +20,17 @@ public class AuthenticationService {
     public User register(String username, String password, String firstName, String lastName, String email, Role role) {
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(password); // Password will be encoded in UserService
+        newUser.setPassword(password);
         newUser.setFirstName(firstName);
         newUser.setLastName(lastName);
         newUser.setEmail(email);
         newUser.setRole(role);
 
-        userService.initiateUserRegistration(newUser); // Corrected method call
+        userService.initiateUserRegistration(newUser);
 
-        User savedUser = newUser; // The user is saved within initiateUserRegistration
+        User savedUser = newUser;
 
         if (role == Role.CUSTOMER) {
-            // Generate a unique account number (you might want a more robust generation strategy)
             String accountNumber = generateAccountNumber();
             customerService.createCustomer(savedUser, accountNumber);
         }
@@ -39,7 +38,6 @@ public class AuthenticationService {
         return savedUser;
     }
 
-    // Simple random account number generation (for demonstration)
     private String generateAccountNumber() {
         Random sb = new Random();
         StringBuilder accountNumberBuilder = new StringBuilder();

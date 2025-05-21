@@ -1,7 +1,7 @@
 package com.app.banking.payload.request;
 
 public class OTPVerificationRequest {
-    private String userId; // Add userId
+    private String userId;
     private String email;
     private String otp;
 

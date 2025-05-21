@@ -6,8 +6,8 @@ import com.app.banking.entity.Role;
 
 public class UserProfileResponse {
 	private Role role;
-    private Long userId; // Changed from customerId to userId for generality
-    private String username; // Added username
+    private Long userId;
+    private String username;
     private String firstName;
     private String lastName;
     private String email;
@@ -15,7 +15,6 @@ public class UserProfileResponse {
     private String address;
     private List<AccountInfoResponse> accounts;
 
-    // Constructors, Getters, Setters
     public UserProfileResponse() {
     }
 

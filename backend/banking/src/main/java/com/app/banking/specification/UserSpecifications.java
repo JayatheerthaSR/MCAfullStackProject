@@ -1,7 +1,8 @@
 package com.app.banking.specification;
 
-import com.app.banking.entity.User;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.app.banking.entity.User;
 
 public class UserSpecifications {
 
@@ -20,7 +21,6 @@ public class UserSpecifications {
             return (root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("role"), role.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Handle invalid role - for example, return a specification that always returns false
             return (root, query, criteriaBuilder) -> criteriaBuilder.equal(criteriaBuilder.literal(1), 0);
         }
     }
@@ -29,7 +29,4 @@ public class UserSpecifications {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("isActive"), active);
     }
-
-    // You can add more specifications for other user attributes as needed
-    // For example: by registration date range, etc.
 }

@@ -17,8 +17,6 @@ public class AdminProfileResponse {
         this.address = address;
     }
 
-    // Getters for all fields
-
     public Long getAdminId() {
         return adminId;
     }
@@ -42,6 +40,4 @@ public class AdminProfileResponse {
     public String getAddress() {
         return address;
     }
-
-    // Optional: Setters if you need to modify the response object later
 }

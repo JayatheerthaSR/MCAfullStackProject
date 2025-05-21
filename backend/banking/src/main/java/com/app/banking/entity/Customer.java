@@ -1,15 +1,26 @@
 package com.app.banking.entity;
 
-import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Customers")
 public class Customer {
 
     @Id
-    @Column(name = "customer_id") // Removed @GeneratedValue
+    @Column(name = "customer_id")
     private Long customerId;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -52,7 +63,6 @@ public class Customer {
         this.user = user;
     }
 
-    // Helper methods to manage the relationship
     public void addAccount(Account account) {
         this.accounts.add(account);
         account.getCustomers().add(this);

@@ -1,8 +1,18 @@
 package com.app.banking.entity;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Transactions")
@@ -29,11 +39,11 @@ public class Transaction {
 
     private String description;
 
-    @Column(name = "receiver_account_number") // Changed from beneficiaryAccountNumber
-    private String receiverAccountNumber; // For transfer/credit transactions
+    @Column(name = "receiver_account_number")
+    private String receiverAccountNumber;
 
-    @Column(name = "sender_account_number") // Changed from sourceAccountNumber
-    private String senderAccountNumber;    // For transfer/debit transactions
+    @Column(name = "sender_account_number")
+    private String senderAccountNumber;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

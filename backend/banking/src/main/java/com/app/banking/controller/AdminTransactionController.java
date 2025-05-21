@@ -1,9 +1,9 @@
 package com.app.banking.controller;
 
-import com.app.banking.entity.Transaction;
-import com.app.banking.payload.response.AdminTransactionResponse;
-import com.app.banking.service.AdminTransactionService;
-import com.app.banking.specification.TransactionSpecifications;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import com.app.banking.entity.Transaction;
+import com.app.banking.payload.response.AdminTransactionResponse;
+import com.app.banking.service.AdminTransactionService;
+import com.app.banking.specification.TransactionSpecifications;
 
 @RestController
 @RequestMapping("/api/admin/transactions")
@@ -54,12 +55,12 @@ public class AdminTransactionController {
 
             } catch (Exception e) {
                 System.err.println("Error parsing date: " + e.getMessage());
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Return error for invalid date format
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
 
         if (accountNumber != null && !accountNumber.isEmpty()) {
-            spec = spec.and(TransactionSpecifications.hasAccountByTransactionType(accountNumber)); // Ensure this spec works with the updated service
+            spec = spec.and(TransactionSpecifications.hasAccountByTransactionType(accountNumber));
         }
 
         Page<AdminTransactionResponse> transactions = adminTransactionService.getAllTransactions(pageable, transactionType, startDate, endDate, accountNumber);

@@ -1,15 +1,16 @@
 package com.app.banking.service;
 
-import com.app.banking.repository.AccountRepository;
-import com.app.banking.repository.BeneficiaryRepository;
-import com.app.banking.repository.TransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.app.banking.repository.AccountRepository;
+import com.app.banking.repository.BeneficiaryRepository;
+import com.app.banking.repository.TransactionRepository;
 
 @Service
 public class SearchService {
@@ -26,7 +27,6 @@ public class SearchService {
     public List<Map<String, Object>> searchAll(String query) {
         List<Map<String, Object>> results = new ArrayList<>();
 
-        // Search Accounts
         accountRepository.findByAccountNumberContaining(query).forEach(account -> {
             Map<String, Object> result = new HashMap<>();
             result.put("id", "account-" + account.getAccountNumber());
@@ -36,7 +36,6 @@ public class SearchService {
             results.add(result);
         });
 
-        // Search Beneficiaries
         beneficiaryRepository.findByBeneficiaryNameContainingIgnoreCaseOrAccountNumberContaining(query, query).forEach(beneficiary -> {
             Map<String, Object> result = new HashMap<>();
             result.put("id", "beneficiary-" + beneficiary.getBeneficiaryId());
@@ -46,7 +45,6 @@ public class SearchService {
             results.add(result);
         });
 
-        // Search Transactions
         transactionRepository.searchByDescriptionOrTransactionIdString(query).forEach(transaction -> {
             Map<String, Object> result = new HashMap<>();
             result.put("id", "transaction-" + transaction.getTransactionId());

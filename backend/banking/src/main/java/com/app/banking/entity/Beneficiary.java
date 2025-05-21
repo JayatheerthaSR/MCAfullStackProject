@@ -1,9 +1,18 @@
 package com.app.banking.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "beneficiaries")
@@ -30,7 +39,7 @@ public class Beneficiary {
     @Column(name = "account_number", nullable = false)
     private String accountNumber;
 
-    @Column(name = "ifsc_code") // Add the ifscCode field
+    @Column(name = "ifsc_code")
     private String ifscCode;
 
     @Column(name = "max_transfer_limit", precision = 10)
@@ -47,7 +56,6 @@ public class Beneficiary {
         updatedAt = LocalDateTime.now();
     }
 
-    // Manually add Getters
     public Long getBeneficiaryId() {
         return beneficiaryId;
     }
@@ -68,7 +76,7 @@ public class Beneficiary {
         return accountNumber;
     }
 
-    public String getIfscCode() { // Add the getter for ifscCode
+    public String getIfscCode() {
         return ifscCode;
     }
 
@@ -84,7 +92,6 @@ public class Beneficiary {
         return updatedAt;
     }
 
-    // Manually add Setters
     public void setBeneficiaryId(Long beneficiaryId) {
         this.beneficiaryId = beneficiaryId;
     }
@@ -105,7 +112,7 @@ public class Beneficiary {
         this.accountNumber = accountNumber;
     }
 
-    public void setIfscCode(String ifscCode) { // Add the setter for ifscCode
+    public void setIfscCode(String ifscCode) {
         this.ifscCode = ifscCode;
     }
 

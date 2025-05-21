@@ -1,14 +1,5 @@
 package com.app.banking.service;
 
-import com.app.banking.entity.Account;
-import com.app.banking.entity.Customer;
-import com.app.banking.entity.Role;
-import com.app.banking.entity.User;
-import com.app.banking.payload.request.ForgotPasswordRequest;
-import com.app.banking.repository.AccountRepository;
-import com.app.banking.repository.CustomerRepository;
-import com.app.banking.repository.UserRepository;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -17,10 +8,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.app.banking.entity.Account;
+import com.app.banking.entity.Customer;
+import com.app.banking.entity.Role;
+import com.app.banking.entity.User;
+import com.app.banking.payload.request.ForgotPasswordRequest;
+import com.app.banking.repository.AccountRepository;
+import com.app.banking.repository.CustomerRepository;
+import com.app.banking.repository.UserRepository;
 
 @Service
 public class UserService {
@@ -43,7 +45,6 @@ public class UserService {
     private final Map<String, RegistrationData> pendingRegistrations = new HashMap<>();
     private final Map<Long, UpdateEmailData> pendingEmailUpdates = new HashMap<>();
 
-    // ... (Your existing inner classes RegistrationData and UpdateEmailData)
     private static class RegistrationData {
 
         private User user;
@@ -112,7 +113,6 @@ public class UserService {
         }
     }
 
-    // New: Public save method for User
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -128,10 +128,8 @@ public class UserService {
         String otp = generateOTP();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(10);
-
         RegistrationData registrationData = new RegistrationData(user, otp, expiryTime);
         pendingRegistrations.put(user.getEmail(), registrationData);
-        // FIX: Pass the first name
         emailService.sendOTPEmail(user.getEmail(), user.getFirstName(), otp);
     }
 
@@ -204,7 +202,7 @@ public class UserService {
             UpdateEmailData verificationData = pendingEmailUpdates.get(existingUser.getUserId());
             if (verificationData != null && verificationData.getNewEmail().equals(updatedUser.getEmail()) && verificationData.isEmailVerified()) {
                 existingUser.setEmail(updatedUser.getEmail());
-                pendingEmailUpdates.remove(existingUser.getUserId()); // Clear verification data
+                pendingEmailUpdates.remove(existingUser.getUserId());
             } else {
                 throw new RuntimeException("New email address is not verified.");
             }
@@ -214,13 +212,17 @@ public class UserService {
     }
 
     public User updateUser(User existingUser, User updatedUser) {
-        return updateUser(existingUser, updatedUser, false); // Default to no email change
+        return updateUser(existingUser, updatedUser, false);
     }
 
     public List<User> getAllCustomers() {
         return userRepository.findByRole(Role.CUSTOMER);
     }
 
+    
+	@Value("${DOMAIN_FRONTEND}")
+    private String frontendDomain;
+	
     @Transactional
     public void processForgotPasswordRequest(ForgotPasswordRequest request) {
         String usernameOrEmail = request.getUsernameOrEmail();
@@ -232,11 +234,9 @@ public class UserService {
             user.setResetTokenExpiry(LocalDateTime.now().plusHours(2));
             userRepository.save(user);
 
-            String resetLink = "http://localhost:3000/reset-password/" + token;
-            // FIX: Pass the first name
+            String resetLink = frontendDomain + "/reset-password/" + token;
             emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         });
-        System.out.println("Password reset requested for username/email: " + usernameOrEmail);
     }
 
     public Optional<User> findByResetToken(String token) {
@@ -271,11 +271,12 @@ public class UserService {
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User not found with ID: " + userId);
         }
-        User user = userOptional.get(); // Get the user object here
+        User user = userOptional.get();
 
         if (user.getEmail().equals(newEmail)) {
             throw new RuntimeException("New email is the same as the current email.");
         }
+        
         if (userRepository.findByEmail(newEmail).isPresent()) {
             throw new RuntimeException("This email address is already in use.");
         }
@@ -285,7 +286,6 @@ public class UserService {
 
         UpdateEmailData updateEmailData = new UpdateEmailData(newEmail, otp, expiryTime);
         pendingEmailUpdates.put(userId, updateEmailData);
-        // FIX: Pass the first name
         emailService.sendUpdateEmailOTPEmail(newEmail, user.getFirstName(), otp);
     }
 

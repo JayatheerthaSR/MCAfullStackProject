@@ -1,8 +1,9 @@
 package com.app.banking.payload.response;
 
-import com.app.banking.entity.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.app.banking.entity.TransactionType;
 
 public class AdminTransactionResponse {
     private Long transactionId;
@@ -27,8 +28,6 @@ public class AdminTransactionResponse {
         this.senderAccountNumber = senderAccountNumber;
         this.customerId = customerId;
     }
-
-    // Getters and Setters (excluding userId)
 
     public Long getTransactionId() {
         return transactionId;

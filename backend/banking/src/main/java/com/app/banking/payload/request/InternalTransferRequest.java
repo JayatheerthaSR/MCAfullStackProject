@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class InternalTransferRequest extends TransferRequest {
     private String sourceAccountNumber;
     private String recipientAccountNumber;
-    private BigDecimal amount; // Changed to BigDecimal
+    private BigDecimal amount;
     private String description;
     private String transferType;
 
@@ -28,11 +28,11 @@ public class InternalTransferRequest extends TransferRequest {
         this.recipientAccountNumber = recipientAccountNumber;
     }
 
-    public BigDecimal getAmount() { // Return type is now BigDecimal
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) { // Parameter type is now BigDecimal
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
