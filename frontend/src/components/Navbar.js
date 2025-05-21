@@ -65,10 +65,16 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  // Determine the redirect path for the brand logo
+  const brandRedirectPath = currentAuth.isLoggedIn
+    ? (currentAuth.role === 'CUSTOMER' ? '/customer/dashboard' : '/admin/dashboard')
+    : '/';
+
   return (
     <nav className={`navbar navbar-expand-lg shadow-sm mb-4 rounded ${isDark ? 'navbar-dark bg-dark' : 'navbar-light bg-light'}`}>
       <div className="container-fluid">
-        <NavLink className="navbar-brand fw-bold" to="/">
+        {/* Updated NavLink 'to' prop: dynamically redirects based on login status and role */}
+        <NavLink className="navbar-brand fw-bold" to={brandRedirectPath}>
           <i className="bi bi-bank me-2"></i>Banking App
         </NavLink>
         <button

@@ -131,7 +131,8 @@ public class UserService {
 
         RegistrationData registrationData = new RegistrationData(user, otp, expiryTime);
         pendingRegistrations.put(user.getEmail(), registrationData);
-        emailService.sendOTPEmail(user.getEmail(), otp);
+        // FIX: Pass the first name
+        emailService.sendOTPEmail(user.getEmail(), user.getFirstName(), otp);
     }
 
     @Transactional
@@ -232,7 +233,8 @@ public class UserService {
             userRepository.save(user);
 
             String resetLink = "http://localhost:3000/reset-password/" + token;
-            emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+            // FIX: Pass the first name
+            emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         });
         System.out.println("Password reset requested for username/email: " + usernameOrEmail);
     }
@@ -269,7 +271,7 @@ public class UserService {
         if (userOptional.isEmpty()) {
             throw new RuntimeException("User not found with ID: " + userId);
         }
-        User user = userOptional.get();
+        User user = userOptional.get(); // Get the user object here
 
         if (user.getEmail().equals(newEmail)) {
             throw new RuntimeException("New email is the same as the current email.");
@@ -283,7 +285,8 @@ public class UserService {
 
         UpdateEmailData updateEmailData = new UpdateEmailData(newEmail, otp, expiryTime);
         pendingEmailUpdates.put(userId, updateEmailData);
-        emailService.sendUpdateEmailOTPEmail(newEmail, otp);
+        // FIX: Pass the first name
+        emailService.sendUpdateEmailOTPEmail(newEmail, user.getFirstName(), otp);
     }
 
     public boolean verifyUpdateEmailOTP(Long userId, String newEmail, String otp) {

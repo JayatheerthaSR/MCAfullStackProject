@@ -28,7 +28,7 @@ const HomePage = () => {
             <div className="col-lg-6 d-none d-lg-block">
               {/* Placeholder for an image or illustration */}
               <img
-                src="https://via.placeholder.com/500" // Replace with your actual image
+                src="https://img.favpng.com/10/3/3/financial-accounting-finance-bank-financial-services-png-favpng-QGRGaUcYwgkZ5mAUPHd1vU0wc.jpg" // Replace with your actual image
                 alt="Modern Banking Illustration"
                 className="img-fluid rounded shadow-lg"
               />
