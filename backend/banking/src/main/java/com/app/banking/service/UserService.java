@@ -234,7 +234,7 @@ public class UserService {
             user.setResetTokenExpiry(LocalDateTime.now().plusHours(2));
             userRepository.save(user);
 
-            String resetLink = frontendDomain + "/reset-password/" + token;
+            String resetLink = frontendDomain + "/api/auth/reset-password/" + token;
             emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         });
     }
