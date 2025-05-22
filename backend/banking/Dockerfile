@@ -1,4 +1,3 @@
-# backend/backend/Dockerfile
 # Use a multi-stage build for a smaller, more secure image
 
 # Stage 1: Build the application
@@ -25,7 +24,8 @@ RUN ./mvnw clean package -DskipTests
 # RUN ./gradlew bootJar
 
 # Stage 2: Create the final lean image
-FROM openjdk:17-jre-slim
+# CHANGE THIS LINE to use a more stable base image
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # Expose the port your Spring Boot app listens on (default is 8080)
