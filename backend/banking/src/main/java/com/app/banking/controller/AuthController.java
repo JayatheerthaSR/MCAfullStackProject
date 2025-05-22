@@ -188,11 +188,11 @@ public class AuthController {
     }
 
     @GetMapping("/reset-password/{token}")
-    public ResponseEntity<?> validateResetToken(@PathVariable String token) {
-        if (userService.validateResetToken(token)) {
+    public ResponseEntity<?> validatePasswordResetToken(@PathVariable String token) {
+        if (userService.findByResetToken(token).isPresent()) { 
             return ResponseEntity.ok("Token is valid.");
         } else {
-            return ResponseEntity.badRequest().body("Invalid or expired reset token.");
+            return new ResponseEntity<>("Invalid or expired reset token.", HttpStatus.BAD_REQUEST);
         }
     }
 
