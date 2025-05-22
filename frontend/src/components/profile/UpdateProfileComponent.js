@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,7 +21,6 @@ const UpdateProfileComponent = () => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  // OTP Verification States
   const [isEmailChanging, setIsEmailChanging] = useState(false);
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -55,7 +54,7 @@ const UpdateProfileComponent = () => {
       setFirstName(response.data.firstName || response.data.user?.firstName || '');
       setLastName(response.data.lastName || response.data.user?.lastName || '');
       setEmail(response.data.email || response.data.user?.email || '');
-      setNewEmail(response.data.email || response.data.user?.email || ''); // Initialize newEmail
+      setNewEmail(response.data.email || response.data.user?.email || '');
       setPhoneNumber(response.data.phone_number || response.data.user?.phoneNumber || response.data.phoneNumber || '');
       setAddress(response.data.address || response.data.user?.address || '');
     } catch (error) {
@@ -82,17 +81,16 @@ const UpdateProfileComponent = () => {
     } else {
       setIsEmailChanging(false);
       setIsOtpSent(false);
-      setIsNewEmailVerified(true); // If email is the same, consider it verified
+      setIsNewEmailVerified(true);
     }
   };
 
   const handleSendOtp = async () => {
     setError('');
     setOtpVerificationError('');
-    setIsOtpSent(true); // Disable the button temporarily
+    setIsOtpSent(true);
     try {
       await api.post('/auth/initiate-update-email', { userId, newEmail });
-      // Optionally show a success message that OTP has been sent
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to send OTP.');
       setIsOtpSent(false);
@@ -105,7 +103,6 @@ const UpdateProfileComponent = () => {
     try {
       const response = await api.post('/auth/verify-update-email-otp', { userId, email: newEmail, otp });
       setIsNewEmailVerified(true);
-      // Optionally show a success message for OTP verification
     } catch (error) {
       setOtpVerificationError(error.response?.data?.message || 'Invalid or expired OTP.');
       setIsNewEmailVerified(false);
@@ -128,13 +125,13 @@ const UpdateProfileComponent = () => {
       return;
     }
 
-    let updateEndpoint = '/profile/update'; // Using the common endpoint
+    let updateEndpoint = '/profile/update';
 
     try {
       await api.put(updateEndpoint, {
         firstName,
         lastName,
-        email: newEmail, // Use the potentially new email
+        email: newEmail,
         phone: phoneNumber,
         address,
       });

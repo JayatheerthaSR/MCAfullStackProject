@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import api from '../../api';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,7 +9,7 @@ const BeneficiaryListComponent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const customerId = localStorage.getItem('userId'); // Assuming userId corresponds to customerId
+  const customerId = localStorage.getItem('userId');
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
@@ -33,12 +33,8 @@ const BeneficiaryListComponent = () => {
   const handleDeleteBeneficiary = async (beneficiaryId, beneficiaryName) => {
     if (window.confirm(`Are you sure you want to delete beneficiary "${beneficiaryName}"? This action cannot be undone.`)) {
       try {
-        // --- IMPORTANT: CORRECTED API CALL PATH ---
-        // Now sending to: /api/customers/{customerId}/beneficiaries/{beneficiaryId}
         await api.delete(`/customers/${customerId}/beneficiaries/${beneficiaryId}`);
-        // --- END CORRECTED API CALL PATH ---
 
-        // Remove the deleted beneficiary from the state to update the UI
         setBeneficiaries(beneficiaries.filter(b => b.beneficiaryId !== beneficiaryId));
         alert('Beneficiary deleted successfully!');
       } catch (error) {

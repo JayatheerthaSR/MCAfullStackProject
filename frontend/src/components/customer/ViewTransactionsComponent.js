@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
@@ -57,7 +57,6 @@ const ViewTransactionsComponent = () => {
     fetchTransactions();
   }, [userId, token]);
 
-
   const downloadPdf = () => {
     const doc = new jsPDF();
     doc.text('Your Transactions', 10, 10);
@@ -103,7 +102,7 @@ const ViewTransactionsComponent = () => {
           No transactions found.
         </div>
       ) : (
-        <div className="table-responsive mb-3"> {/* Added mb-3 for spacing */}
+        <div className="table-responsive mb-3">
           <table className={`table table-striped ${isDark ? 'table-dark' : 'table-light'}`}>
             <thead>
               <tr>

@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
 const UserProfileComponent = () => {
-  console.log("UserProfileComponent rendered!");
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role');
-  console.log("userId before useEffect:", userId);
-  console.log("role before useEffect:", role);
 
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
@@ -23,8 +20,6 @@ const UserProfileComponent = () => {
       setLoading(true);
       setError('');
       try {
-        console.log("userId inside useEffect:", userId);
-        console.log("role inside useEffect:", role);
         if (!userId || !role) {
           throw new Error('Missing userId or role in localStorage.');
         }
@@ -45,7 +40,6 @@ const UserProfileComponent = () => {
 
       } catch (error) {
         setError(error.message || 'Failed to load profile information.');
-        console.error("Error fetching profile:", error);
       } finally {
         setLoading(false);
       }

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -25,7 +25,7 @@ const ChangePasswordComponent = ({ redirectPath }) => {
     }
 
     try {
-      const response = await api.post('auth/change-password', { // Assuming the backend endpoint is the same
+      const response = await api.post('auth/change-password', {
         currentPassword,
         newPassword,
       });
@@ -33,7 +33,7 @@ const ChangePasswordComponent = ({ redirectPath }) => {
       if (response && response.status === 200) {
         setSuccessMessage('Password changed successfully!');
         setTimeout(() => {
-          navigate(redirectPath || '/customer/profile'); // Default redirect to customer profile
+          navigate(redirectPath || '/customer/profile');
         }, 1500);
       } else {
         setError(response?.data?.message || 'Failed to change password.');

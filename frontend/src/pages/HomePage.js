@@ -1,5 +1,3 @@
-// src/pages/HomePage.js
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { ThemeContext } from '../contexts/ThemeContext';
@@ -26,11 +24,10 @@ const HomePage = () => {
               </div>
             </div>
             <div className="col-lg-6 d-none d-lg-block">
-              {/* Placeholder for an image or illustration */}
               <img
-                src="https://img.favpng.com/10/3/3/financial-accounting-finance-bank-financial-services-png-favpng-QGRGaUcYwgkZ5mAUPHd1vU0wc.jpg" // Replace with your actual image
+                src="https://cdni.iconscout.com/illustration/premium/thumb/online-banking-account-illustration-download-in-svg-png-gif-file-formats--mobile-transaction-secure-payment-people-illustrations-3964060.png?f=webp"
                 alt="Modern Banking Illustration"
-                className="img-fluid rounded shadow-lg"
+                className="img-fluid rounded"
               />
             </div>
           </div>

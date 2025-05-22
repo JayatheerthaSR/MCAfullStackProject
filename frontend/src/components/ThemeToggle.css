@@ -1,68 +1,68 @@
-/* src/components/ThemeToggle.css */
-
 .theme-toggle {
-    /* Make it small and square-ish for an icon */
-    padding: 0.4rem;        /* Equal padding on all sides */
-    width: 2.2rem;          /* Fixed width for a square button */
-    height: 2.2rem;         /* Fixed height for a square button */
-    font-size: 1.1rem;      /* Larger icon size */
-    
+    padding: 0.4rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+
     font-weight: 500;
     border: 1px solid;
     border-radius: 0.3rem;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.2s ease, 
+                color 0.2s ease, 
+                border-color 0.2s ease, 
+                box-shadow 0.2s ease;
     white-space: nowrap;
     display: inline-flex;
-    align-items: center;    /* Center the icon vertically */
-    justify-content: center; /* Center the icon horizontally */
+    align-items: center;
+    justify-content: center;
     user-select: none;
     text-decoration: none;
 }
 
 /* Light theme styles */
 .theme-toggle.light {
-    background-color: #f0f2f5; /* Very light gray, almost white */
-    color: #495057;           /* Medium dark gray icon color */
-    border-color: #e9ecef;    /* Subtle light border */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
+    background-color: #f0f2f5;
+    color: #495057;
+    border-color: #e9ecef;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .theme-toggle.light:hover {
-    background-color: #e2e6ea; /* Slightly darker on hover */
+    background-color: #e2e6ea;
     border-color: #d3d9df;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Slightly more prominent shadow */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);   
 }
 
 .theme-toggle.light:active {
-    background-color: #dae0e5; /* Even darker on click */
+    background-color: #dae0e5;  
     border-color: #cbd3da;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15); /* Inset shadow for press effect */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 /* Dark theme styles */
 .theme-toggle.dark {
-    background-color: #454d55; /* A bit lighter than full dark, for contrast */
-    color: #e0e0e0;           /* Light gray icon color */
-    border-color: #5a6268;    /* Darker border */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow in dark mode */
+    background-color: #454d55;
+    color: #e0e0e0;
+    border-color: #5a6268;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .theme-toggle.dark:hover {
-    background-color: #5a6268; /* Slightly lighter on hover */
+    background-color: #5a6268;
     border-color: #6c757d;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .theme-toggle.dark:active {
-    background-color: #6c757d; /* Even lighter on click */
+    background-color: #6c757d; 
     border-color: #7d848a;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 /* Focus styles for accessibility */
 .theme-toggle:focus-visible {
-    outline: 2px solid #007bff; /* Standard blue outline */
+    outline: 2px solid #007bff;
     outline-offset: 2px;
-    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Bootstrap-like focus glow */
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
 }

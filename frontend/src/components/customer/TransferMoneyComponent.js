@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -51,7 +51,7 @@ const TransferMoneyComponent = () => {
           if (response.data.length === 0) {
             setError('No accounts found for this customer.');
           } else {
-            setError(''); // Clear any previous "no accounts" error if accounts are now fetched
+            setError('');
           }
         } else if (response.status === 404) {
           setError('No accounts found for this customer.');
@@ -177,8 +177,8 @@ const TransferMoneyComponent = () => {
           return;
         }
         transferData.recipientAccountNumber = internalRecipientAccountNumber;
-        transferData.transferType = 'INTERNAL'; // Add transferType for internal
-        response = await api.post(`/customers/${customerId}/transfer`, transferData); // Keep the /transfer endpoint
+        transferData.transferType = 'INTERNAL';
+        response = await api.post(`/customers/${customerId}/transfer`, transferData);
       } else {
         if (!selectedBeneficiary) {
           setError('Please select a beneficiary.');
@@ -189,8 +189,8 @@ const TransferMoneyComponent = () => {
           return;
         }
         transferData.beneficiaryAccountNumber = selectedBeneficiary.accountNumber;
-        transferData.transferType = 'EXTERNAL'; // Add transferType for external
-        response = await api.post(`/customers/${customerId}/transfer`, transferData); // Keep the /transfer endpoint
+        transferData.transferType = 'EXTERNAL';
+        response = await api.post(`/customers/${customerId}/transfer`, transferData);
       }
 
       if (response.status === 200) {
@@ -224,7 +224,7 @@ const TransferMoneyComponent = () => {
           } else if (error.response.data?.includes('Transfer amount exceeds the maximum transfer limit')) {
             setError(error.response.data);
           } else if (error.response.data === 'Invalid transfer type.') {
-            setError('Invalid transfer type.'); // Keep this error handling
+            setError('Invalid transfer type.');
           } else {
             setError(error.response.data?.message || 'Transfer failed due to a bad request.');
           }
@@ -261,7 +261,7 @@ const TransferMoneyComponent = () => {
                 value={selectedAccount}
                 onChange={handleAccountChange}
                 required
-                disabled={accounts.length === 0} // Disable if no accounts
+                disabled={accounts.length === 0}
               >
                 <option value="">{accounts.length === 0 ? 'No Accounts Available' : '-- Select an Account --'}</option>
                 {accounts.map((account) => (
@@ -273,7 +273,7 @@ const TransferMoneyComponent = () => {
             </div>
 
             {availableBalance !== null && (
-              <p className={`mb-3 text-muted text-center ${isDark ? 'text-light' : ''}`}>
+              <p className={`pl-2 text-info ${isDark ? 'text-light' : ''}`}>
                 Available Balance: <strong>{availableBalance}</strong>
               </p>
             )}
@@ -349,7 +349,7 @@ const TransferMoneyComponent = () => {
                   min="0.01"
                   step="0.01"
                   max={!isInternalTransfer ? (maxTransferLimit || '') : ''}
-                  disabled={accounts.length === 0} // Disable amount input if no accounts
+                  disabled={accounts.length === 0}
                 />
               </div>
 
@@ -361,7 +361,7 @@ const TransferMoneyComponent = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows="3"
-                  disabled={accounts.length === 0} // Disable description if no accounts
+                  disabled={accounts.length === 0}
                 ></textarea>
               </div>
 

@@ -1,14 +1,12 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Set your Spring Boot API base URL
+  baseURL: process.env.REACT_APP_DOMAIN_BACKEND + '/api',
 });
 
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    // Only add the Authorization header if a token exists
-    // and the request is NOT for the login or register endpoints
     if (token && config.url !== '/auth/login' && config.url !== '/auth/register') {
       config.headers.Authorization = `Bearer ${token}`;
     }

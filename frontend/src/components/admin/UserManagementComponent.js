@@ -1,6 +1,5 @@
-// src/components/admin/UserManagementComponent.js
-import React, { useState, useEffect, useContext } from 'react';
-import api from '../../api'; // Adjust the path to your api.js file
+import { useState, useEffect, useContext } from 'react';
+import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
@@ -13,13 +12,12 @@ const UserManagementComponent = () => {
   const [usernameFilter, setUsernameFilter] = useState('');
   const [emailFilter, setEmailFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
-  const [isActiveFilter, setIsActiveFilter] = useState(''); // Holds '', 'true', or 'false' string from select
+  const [isActiveFilter, setIsActiveFilter] = useState('');
   const [editingRoleUserId, setEditingRoleUserId] = useState(null);
   const [newRole, setNewRole] = useState('');
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  // Get the ID of the currently logged-in user from localStorage
   const loggedInUserId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -36,7 +34,6 @@ const UserManagementComponent = () => {
       if (usernameFilter) params.append('username', usernameFilter);
       if (emailFilter) params.append('email', emailFilter);
       if (roleFilter) params.append('role', roleFilter);
-      // Append isActive only if a specific true/false value is selected
       if (isActiveFilter !== '') params.append('isActive', isActiveFilter);
 
       const response = await api.get(`/admin/users?${params.toString()}`);
@@ -60,13 +57,12 @@ const UserManagementComponent = () => {
         setRoleFilter(value);
         break;
       case 'isActive':
-        // Store as string 'true', 'false', or '' for "All"
         setIsActiveFilter(value);
         break;
       default:
         break;
     }
-    setPage(0); // Reset to first page on filter change
+    setPage(0);
   };
 
   const handlePageChange = (newPage) => {
@@ -78,17 +74,15 @@ const UserManagementComponent = () => {
   const handlePageSizeChange = (event) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
-    setPage(0); // Reset to first page on page size change
+    setPage(0);
   };
 
   const handleToggleActive = async (userId, currentActive) => {
-    // Frontend check to prevent self-deactivation/activation
     if (userId.toString() === loggedInUserId) {
       alert("You cannot deactivate/activate your own account!");
       return;
     }
     try {
-      // Send the opposite of currentActive to update status
       const response = await api.put(`/admin/users/${userId}/status?isActive=${!currentActive}`);
       if (response.status === 200) {
         setUsers(users.map(user =>
@@ -103,7 +97,6 @@ const UserManagementComponent = () => {
   };
 
   const handleEditRole = (userId, currentRole) => {
-    // Frontend check to prevent self-role-change
     if (userId.toString() === loggedInUserId) {
       alert("You cannot change the role of your own account!");
       return;
@@ -117,7 +110,6 @@ const UserManagementComponent = () => {
   };
 
   const handleSaveRole = async (userId) => {
-    // This check is already implicitly handled by handleEditRole, but good to have a redundant check
     if (userId.toString() === loggedInUserId) {
       alert("You cannot change the role of your own account!");
       return;
@@ -128,7 +120,7 @@ const UserManagementComponent = () => {
         setUsers(users.map(user =>
           user.userId === userId ? { ...user, role: newRole } : user
         ));
-        setEditingRoleUserId(null); // Exit edit mode
+        setEditingRoleUserId(null);
       } else {
         setError('Failed to update user role.');
       }
@@ -138,11 +130,10 @@ const UserManagementComponent = () => {
   };
 
   const handleCancelEditRole = () => {
-    setEditingRoleUserId(null); // Exit edit mode
+    setEditingRoleUserId(null);
   };
 
   const handleDeleteUser = async (userId) => {
-    // Frontend check to prevent self-deletion
     if (userId.toString() === loggedInUserId) {
       alert("You cannot delete your own account!");
       return;
@@ -150,8 +141,8 @@ const UserManagementComponent = () => {
     if (window.confirm(`Are you sure you want to delete user with ID: ${userId}? This action cannot be undone.`)) {
       try {
         const response = await api.delete(`/admin/users/${userId}`);
-        if (response.status === 204) { // 204 No Content for successful delete
-          fetchAllUsers(); // Re-fetch users to update the list
+        if (response.status === 204) {
+          fetchAllUsers();
         } else {
           setError('Failed to delete user.');
         }

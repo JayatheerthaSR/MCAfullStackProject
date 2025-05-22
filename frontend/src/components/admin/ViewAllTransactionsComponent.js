@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThemeContext } from '../../contexts/ThemeContext';
@@ -15,8 +15,7 @@ const ViewAllTransactionsComponent = () => {
   const [totalElements, setTotalElements] = useState(0);
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-
-  const transactionTypes = ['', 'Debit', 'Credit']; // Simplified transaction types
+  const transactionTypes = ['', 'Debit', 'Credit']; 
 
   useEffect(() => {
     fetchAllTransactions();

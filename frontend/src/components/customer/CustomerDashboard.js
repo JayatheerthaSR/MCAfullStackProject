@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import './CustomerDashboard.css'; // Keep this for any specific custom styles
+import './CustomerDashboard.css';
 
 import { ThemeContext } from '../../contexts/ThemeContext';
 
@@ -51,7 +51,6 @@ const CustomerDashboard = () => {
         <h2 className="mb-4">Customer Dashboard</h2>
         <p className="lead">Welcome to your dashboard! Here you can manage your accounts, view transactions, and more.</p>
 
-        {/* Display Accounts and Balances */}
         <div className="mb-4">
           <h3>Your Accounts</h3>
           {loadingAccounts ? (
@@ -70,14 +69,14 @@ const CustomerDashboard = () => {
                     <div>
                       <strong>Account Number:</strong> {account.accountNumber}
                       <br />
-                      <small className="text-muted">Type: {account.accountType}</small>
+                      <small className="text-muted">Type: <span className="bg-info badge">{account.accountType}</span></small>
                     </div>
                     <span className="badge bg-success rounded-pill">Balance: {account.balance}</span>
                   </li>
                 ))}
               </ul>
               <div className="mt-3">
-                <strong>Total Balance: <span className="text-success">${totalBalance.toFixed(2)}</span></strong>
+                <strong>Total Balance: <span className="text-success">{totalBalance.toFixed(2)}</span></strong>
               </div>
             </>
           ) : (
@@ -131,7 +130,6 @@ const CustomerDashboard = () => {
               </div>
             </div>
           </div>
-          {/* More cards can be added here */}
         </div>
       </div>
     </div>

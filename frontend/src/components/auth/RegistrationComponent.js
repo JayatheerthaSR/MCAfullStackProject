@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -15,7 +15,8 @@ const RegistrationComponent = () => {
     address: '',
     role: 'CUSTOMER',
   });
-  const [phone, setPhone] = useState(''); // Added phone number state
+
+  const [phone, setPhone] = useState('');
   const [passwordValid, setPasswordValid] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +43,7 @@ const RegistrationComponent = () => {
   };
 
   const validatePassword = (password) => {
-    const minLength = 8; // Minimum length is now 8
+    const minLength = 8;
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasDigit = /[0-9]/.test(password);
@@ -78,7 +79,7 @@ const RegistrationComponent = () => {
     }
     setLoading(true);
     try {
-      const response = await api.post('/auth/register', { // Corrected API endpoint
+      const response = await api.post('/auth/register', {
         username: registrationData.username,
         password: registrationData.password,
         firstName: registrationData.firstName,
@@ -86,9 +87,10 @@ const RegistrationComponent = () => {
         email: registrationData.email,
         address: registrationData.address,
         role: registrationData.role,
-        phone: phone, // Included the phone number
+        phone: phone,
       });
-      setMessage(response.data); // "Registration initiated. Please check your email for OTP verification."
+
+      setMessage(response.data);
       setShowOtpVerification(true);
     } catch (err) {
       setError(err.response?.data || 'Registration failed. Please try again.');
@@ -103,8 +105,8 @@ const RegistrationComponent = () => {
     setVerificationLoading(true);
     try {
       const response = await api.post('/auth/verify-otp', { email: registrationData.email, otp });
-      setMessage(response.data); // "Email verified successfully. You can now log in."
-      setTimeout(() => navigate('/login'), 3000); // Redirect after successful verification
+      setMessage(response.data);
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       setVerificationError(err.response?.data || 'OTP verification failed. Please try again.');
     } finally {
@@ -225,9 +227,6 @@ const RegistrationComponent = () => {
                       </button>
                     </div>
                   </form>
-                  <p className={`mt-3 text-center ${isDark ? 'text-light' : 'text-muted'}`}>
-                    Didn't receive the OTP? {/* Add a "Resend OTP" link/button here if needed */}
-                  </p>
                 </div>
               )}
             </div>

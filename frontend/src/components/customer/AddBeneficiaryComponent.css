@@ -1,41 +1,28 @@
-/* AddBeneficiaryComponent.css */
-
-/* Example: Add some margin to the card */
 .card {
   margin-bottom: 20px;
-  border-radius: 8px; /* Example: Slightly round the corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Example: Add a subtle shadow */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Example: Style the heading */
 h2 {
-  color: #007bff; /* Example: Use Bootstrap's primary color */
+  color: #007bff;
   text-align: center;
   margin-bottom: 25px;
 }
 
-/* Example: Add some spacing to form elements */
 .mb-3 {
-  margin-bottom: 1.5rem !important; /* Increase default Bootstrap margin */
+  margin-bottom: 1.5rem !important;
 }
 
 .form-label {
   font-weight: bold;
-  color: #343a40; /* Example: Darker text for labels */
+  color: #343a40;
 }
 
 .form-control {
-  border: 1px solid #ced4da; /* Use Bootstrap's default border color */
+  border: 1px solid #ced4da;
   border-radius: 0.25rem;
   padding: 0.375rem 0.75rem;
-}
-
-.btn-primary {
-  /* You can further customize the primary button if needed */
-}
-
-.btn-secondary {
-  /* You can further customize the secondary button if needed */
 }
 
 .alert-danger {

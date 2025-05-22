@@ -1,6 +1,3 @@
-/* src/components/GlobalSearchComponent.css */
-
-/* Global Search Component Wrapper for Navbar */
 .global-search-wrapper {
   position: relative;
   width: 40px;
@@ -10,13 +7,11 @@
   margin-left: auto;
 }
 
-/* Expanded state for the wrapper */
 .global-search-wrapper.is-active {
   width: 200px;
   max-width: 250px;
 }
 
-/* Input field styling (form-control) */
 .global-search-wrapper .form-control {
   width: 0;
   padding-left: 0;
@@ -26,7 +21,6 @@
   transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
 }
 
-/* Input field when active (expanded state) */
 .global-search-wrapper.is-active .form-control {
   width: auto;
   padding: 0.25rem 0.5rem;
@@ -36,67 +30,56 @@
   flex-grow: 1;
 }
 
-/* Ensure the input-group layout behaves as expected */
 .global-search-wrapper .input-group {
-    flex-wrap: nowrap;
+  flex-wrap: nowrap;
 }
 
-/* Specific styling for the search button (always visible) */
 .global-search-wrapper .input-group-sm .btn {
-    height: calc(1.8125rem + 2px);
-    padding: 0.2rem 0.4rem;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    z-index: 1;
-    margin-left: -1px;
-
-    /* --- Changes start here --- */
-    background-color: transparent; /* Make background transparent */
-    border-color: transparent; /* Make border transparent */
-    color: var(--bs-navbar-color); /* Inherit text color from navbar links (Bootstrap 5 custom property) */
-    /* Add transition for smoother color changes on hover/focus if needed */
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  height: calc(1.8125rem + 2px);
+  padding: 0.2rem 0.4rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+  margin-left: -1px;
+  border-radius: 0.25rem;
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--bs-navbar-color);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Hover state for the button */
 .global-search-wrapper .input-group-sm .btn:hover {
-    color: var(--bs-navbar-hover-color); /* Use Bootstrap's hover color for links */
-    background-color: rgba(var(--bs-light-rgb), 0.1); /* Slightly visible background on hover for light theme */
-    border-color: transparent;
+  color: var(--bs-navbar-hover-color);
+  background-color: rgba(var(--bs-light-rgb), 0.1);
+  border-color: transparent;
 }
 
-/* Active/Focus state for the button */
 .global-search-wrapper .input-group-sm .btn:focus,
 .global-search-wrapper .input-group-sm .btn:active {
-    outline: none; /* Remove default focus outline */
-    box-shadow: none; /* Remove default box shadow */
-    color: var(--bs-navbar-active-color); /* Use Bootstrap's active color for links */
-    background-color: rgba(var(--bs-light-rgb), 0.2); /* Slightly more visible background */
+  outline: none;
+  box-shadow: none;
+  color: var(--bs-navbar-active-color);
+  background-color: rgba(var(--bs-light-rgb), 0.2);
 }
 
-/* Dark mode specific adjustments for the button */
 html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn {
-    color: var(--bs-navbar-dark-color); /* Bootstrap 5 dark mode navbar link color */
+  color: var(--bs-navbar-dark-color);
 }
 
 html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:hover {
-    color: var(--bs-navbar-dark-hover-color); /* Dark mode hover color */
-    background-color: rgba(var(--bs-dark-rgb), 0.2); /* Slightly visible dark background on hover */
+  color: var(--bs-navbar-dark-hover-color);
+  background-color: rgba(var(--bs-dark-rgb), 0.2);
 }
 
 html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:focus,
 html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:active {
-    color: var(--bs-navbar-dark-active-color); /* Dark mode active color */
-    background-color: rgba(var(--bs-dark-rgb), 0.3); /* Slightly more visible dark background */
+  color: var(--bs-navbar-dark-active-color);
+  background-color: rgba(var(--bs-dark-rgb), 0.3);
 }
 
-/* --- Changes end here --- */
-
-
-/* Search results and error dropdown styles */
 .search-results-dropdown,
 .search-error-dropdown {
   position: absolute;
@@ -115,7 +98,6 @@ html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:active {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Show dropdowns when the search wrapper is active */
 .global-search-wrapper.is-active .search-results-dropdown,
 .global-search-wrapper.is-active .search-error-dropdown {
   opacity: 1;
@@ -123,7 +105,6 @@ html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:active {
   transform: translateY(0);
 }
 
-/* Common list group item styling within dropdown */
 .search-results-dropdown .list-group-item {
   cursor: pointer;
   padding: 0.4rem 0.8rem;
@@ -140,22 +121,20 @@ html[data-bs-theme="dark"] .global-search-wrapper .input-group-sm .btn:active {
   background-color: var(--bs-tertiary-bg);
 }
 
-/* Text styling within search results items */
 .search-result-item strong {
-    font-size: 0.8em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    line-height: 1.2;
+  font-size: 0.8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 1.2;
 }
 
 .search-result-item small {
-    font-size: 0.7em;
-    display: block;
+  font-size: 0.7em;
+  display: block;
 }
 
-/* Dark mode specific adjustments for dropdown list items */
 html[data-bs-theme="dark"] .search-results-dropdown .list-group-item {
   background-color: var(--bs-dark);
   color: var(--bs-light);
@@ -167,11 +146,10 @@ html[data-bs-theme="dark"] .search-results-dropdown .list-group-item:hover {
 }
 
 html[data-bs-theme="dark"] .search-results-dropdown .dropdown-header {
-    color: var(--bs-gray-400);
+  color: var(--bs-gray-400);
 }
 
-/* Adjustments for the spinner to be centered */
 .spinner-border-sm {
-    margin: 0 auto;
-    display: block;
+  margin: 0 auto;
+  display: block;
 }

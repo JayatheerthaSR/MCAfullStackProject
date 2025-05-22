@@ -110,5 +110,7 @@ code {
   border-color: #6c757d;
 }
 
-/* Add more styles for other Bootstrap components and your custom components as needed */
-/* Remember to inspect your application and add styles based on the actual class names you are using */
+* {
+  border-radius: 5px;
+  padding: 2px;
+}

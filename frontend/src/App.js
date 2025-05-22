@@ -1,5 +1,4 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React from 'react';
 import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import LoginComponent from './components/auth/LoginComponent';
 import RegistrationComponent from './components/auth/RegistrationComponent';
@@ -21,7 +20,6 @@ import './App.css';
 import BeneficiaryListComponent from './components/customer/BeneficiaryListComponent';
 import SessionManager from './components/auth/SessionManager';
 import ChangePasswordComponent from './components/profile/ChangePasswordComponent';
-// --- UPDATED: Renamed from UserManagementPage to UserManagementComponent ---
 import UserManagementComponent from './components/admin/UserManagementComponent';
 import ChatSupport from './components/ChatSupport';
 
@@ -53,7 +51,6 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="transactions" element={<ViewAllTransactionsComponent />} />
-              {/* --- UPDATED: Using UserManagementComponent here --- */}
               <Route path="users" element={<UserManagementComponent />} />
               <Route path="profile" element={<UserProfileComponent />} />
               <Route path="profile/update" element={<UpdateProfileComponent />} />

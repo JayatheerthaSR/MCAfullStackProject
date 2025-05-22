@@ -1,4 +1,3 @@
-/* src/components/ChatSupport.css */
 .chat-support-container {
   position: fixed;
   bottom: 20px;
@@ -15,11 +14,11 @@
 }
 
 .chat-toggle-button.open {
-  bottom: 330px; /* Adjust based on chat window height */
+  bottom: 330px;
 }
 
 .chat-window {
-  width: 300px;
+  width: 30rem;
   height: 300px;
   border-radius: 5px;
   overflow: hidden;
@@ -107,8 +106,6 @@
   padding: 8px 12px;
   cursor: pointer;
 }
-
-/* src/components/ChatSupport.css (add this to your existing CSS) */
 
 .typing-indicator .dot {
   display: inline-block;

@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
-import './AddBeneficiaryComponent.css'; // Keep your custom styles if any
+import './AddBeneficiaryComponent.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
@@ -12,7 +12,7 @@ const AddBeneficiaryComponent = () => {
   const [maxTransferLimit, setMaxTransferLimit] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const customerId = localStorage.getItem('userId'); // Assuming userId corresponds to customerId
+  const customerId = localStorage.getItem('userId');
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
@@ -28,15 +28,15 @@ const AddBeneficiaryComponent = () => {
       });
 
       if (response.status === 201) {
-        navigate('/customer/beneficiaries'); // Redirect to beneficiaries list on success
+        navigate('/customer/beneficiaries');
       } else {
-        setError('Failed to add beneficiary.'); // Generic error for unexpected success responses
+        setError('Failed to add beneficiary.');
       }
     } catch (error) {
       if (error.response && error.response.status === 409) {
-        setError(error.response.data); // Display the error message from the backend
+        setError(error.response.data);
       } else if (error.response && error.response.data && error.response.data.message) {
-        setError(error.response.data.message); // Display specific error message from backend
+        setError(error.response.data.message);
       } else {
         setError('Failed to add beneficiary. Please check your connection or try again.');
       }

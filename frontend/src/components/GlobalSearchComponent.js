@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect, useCallback } from 'react'; // Added useCallback
+import { useState, useContext, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { ThemeContext } from '../contexts/ThemeContext';
@@ -15,35 +15,28 @@ const GlobalSearchComponent = () => {
   const isDark = theme === 'dark';
 
   const searchContainerRef = useRef(null);
-  const searchInputRef = useRef(null); // Ref specifically for the input field
+  const searchInputRef = useRef(null);
 
-  // Memoized callback for setting active state on focus
   const activateSearch = useCallback(() => {
     if (!isSearchActive) {
       setIsSearchActive(true);
-      console.log('Search Activated via useCallback!');
     }
   }, [isSearchActive]);
 
-  // Memoized callback for deactivating search on blur
   const deactivateSearch = useCallback(() => {
-    // Only deactivate if the search term is empty AND focus has left the search container
-    // Use a small timeout to allow click events on search results to register
     setTimeout(() => {
       if (!searchTerm.trim() && searchContainerRef.current && !searchContainerRef.current.contains(document.activeElement)) {
         setIsSearchActive(false);
-        console.log('Search Deactivated via useCallback!');
       }
     }, 100);
   }, [searchTerm]);
 
-  // Effect to handle clicks outside the search component
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setSearchResults([]);
         setError('');
-        deactivateSearch(); // Use the memoized callback
+        deactivateSearch();
       }
     };
 
@@ -51,38 +44,30 @@ const GlobalSearchComponent = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [deactivateSearch]); // Dependency on deactivateSearch
+  }, [deactivateSearch]);
 
-  // Effect to manage focus/blur on the actual input element
   useEffect(() => {
     const currentInput = searchInputRef.current;
     if (currentInput) {
-      // Add event listeners directly to the DOM element
       currentInput.addEventListener('focus', activateSearch);
       currentInput.addEventListener('blur', deactivateSearch);
 
-      // Cleanup function to remove event listeners
       return () => {
         currentInput.removeEventListener('focus', activateSearch);
         currentInput.removeEventListener('blur', deactivateSearch);
       };
     }
-  }, [activateSearch, deactivateSearch]); // Re-run if callbacks change
+  }, [activateSearch, deactivateSearch]);
 
-  // Handle input value changes
   const handleInputChange = (event) => {
     setSearchTerm(event.target.value);
-    // Ensure search is active if content is typed
     if (event.target.value.trim() && !isSearchActive) {
       setIsSearchActive(true);
     } else if (!event.target.value.trim() && isSearchActive) {
-      // If content is cleared, and search is active, attempt to deactivate
-      // This is a subtle improvement to handle clearing the input while focused
       deactivateSearch();
     }
   };
 
-  // Function to explicitly focus the input when the wrapper is clicked
   const handleWrapperClick = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -118,8 +103,7 @@ const GlobalSearchComponent = () => {
     setSearchTerm('');
     setSearchResults([]);
     setError('');
-    setIsSearchActive(false); // Deactivate after selection
-    // Also, try to blur the input to collapse the search bar
+    setIsSearchActive(false);
     if (searchInputRef.current) {
       searchInputRef.current.blur();
     }
@@ -139,13 +123,11 @@ const GlobalSearchComponent = () => {
   };
 
   return (
-    // Add onClick to the wrapper to force focus if needed
     <div
       className={`global-search-wrapper ${isSearchActive ? 'is-active' : ''}`}
       ref={searchContainerRef}
-      onClick={handleWrapperClick} // This will try to focus the input when wrapper is clicked
+      onClick={handleWrapperClick}
     >
-      {console.log('Render Cycle: isSearchActive =', isSearchActive, 'Applied class =', `global-search-wrapper ${isSearchActive ? 'is-active' : ''}`)}
       <form onSubmit={handleSearchSubmit} className="d-flex mb-0">
         <div className="input-group input-group-sm">
           <input
@@ -154,8 +136,7 @@ const GlobalSearchComponent = () => {
             placeholder="Search..."
             value={searchTerm}
             onChange={handleInputChange}
-            ref={searchInputRef} // Assign ref to the input
-            // Removed onFocus and onBlur props as they are handled by useEffect
+            ref={searchInputRef} 
             aria-label="Global Search input field"
           />
           <button

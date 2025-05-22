@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import { ThemeContext } from '../contexts/ThemeContext';
@@ -10,22 +10,17 @@ const Navbar = () => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  // State to track login status and role, derived from localStorage
   const [currentAuth, setCurrentAuth] = useState(() => ({
     isLoggedIn: !!localStorage.getItem('token'),
     role: localStorage.getItem('role'),
     token: localStorage.getItem('token'),
   }));
 
-  // Update auth state when localStorage changes or location changes
+  
   useEffect(() => {
-    // Determine if the current route is a public route
     const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
     const tokenFromStorage = localStorage.getItem('token');
     const roleFromStorage = localStorage.getItem('role');
-
-    // A user is considered logged in if a token exists AND the route is not a public one
-    // This helps manage `isLoggedIn` state more accurately for UI components
     const newIsLoggedIn = !!tokenFromStorage && !publicRoutes.includes(location.pathname);
 
     setCurrentAuth({
@@ -34,7 +29,6 @@ const Navbar = () => {
       token: tokenFromStorage,
     });
 
-    // Listen for storage events (e.g., logout from another tab/window)
     const handleStorageChange = (event) => {
       if (event.key === 'token' || event.key === 'role') {
         const updatedToken = localStorage.getItem('token');
@@ -54,18 +48,17 @@ const Navbar = () => {
       window.removeEventListener('storage', handleStorageChange);
     };
 
-  }, [location]); // Re-run effect if location changes
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    localStorage.removeItem('userId'); // Ensure userId is also cleared on logout
-    localStorage.removeItem('customerId'); // Clear customerId if present
-    setCurrentAuth({ isLoggedIn: false, role: null, token: null }); // Update state immediately
+    localStorage.removeItem('userId');
+    localStorage.removeItem('customerId');
+    setCurrentAuth({ isLoggedIn: false, role: null, token: null });
     navigate('/login');
   };
 
-  // Determine the redirect path for the brand logo
   const brandRedirectPath = currentAuth.isLoggedIn
     ? (currentAuth.role === 'CUSTOMER' ? '/customer/dashboard' : '/admin/dashboard')
     : '/';
@@ -73,7 +66,6 @@ const Navbar = () => {
   return (
     <nav className={`navbar navbar-expand-lg shadow-sm mb-4 rounded ${isDark ? 'navbar-dark bg-dark' : 'navbar-light bg-light'}`}>
       <div className="container-fluid">
-        {/* Updated NavLink 'to' prop: dynamically redirects based on login status and role */}
         <NavLink className="navbar-brand fw-bold" to={brandRedirectPath}>
           <i className="bi bi-bank me-2"></i>Banking App
         </NavLink>
@@ -94,7 +86,6 @@ const Navbar = () => {
               <li className="nav-item">
                 <NavLink
                   className={`nav-link ${
-                    // Highlight Dashboard link if currently on dashboard path for current role
                     (currentAuth.role === 'CUSTOMER' && location.pathname.startsWith('/customer/dashboard')) ||
                     (currentAuth.role === 'ADMIN' && location.pathname.startsWith('/admin/dashboard'))
                       ? 'active'

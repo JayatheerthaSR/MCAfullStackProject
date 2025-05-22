@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link here!
+import { useState, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../api';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ThemeContext } from '../../contexts/ThemeContext';

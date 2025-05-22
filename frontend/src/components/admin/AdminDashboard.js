@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
@@ -47,11 +47,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Add more cards for other admin functionalities here */}
       </div>
-
-      
     </div>
   );
 };
