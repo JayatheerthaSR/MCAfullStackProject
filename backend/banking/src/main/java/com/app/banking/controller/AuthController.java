@@ -1,5 +1,6 @@
 package com.app.banking.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -183,6 +185,15 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         userService.processForgotPasswordRequest(request);
         return ResponseEntity.ok("Password reset link sent to your email if the account exists.");
+    }
+
+    @GetMapping("/reset-password/{token}")
+    public ResponseEntity<?> validateResetToken(@PathVariable String token) {
+        if (userService.validateResetToken(token)) {
+            return ResponseEntity.ok("Token is valid.");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid or expired reset token.");
+        }
     }
 
     @PostMapping("/reset-password/{token}")
