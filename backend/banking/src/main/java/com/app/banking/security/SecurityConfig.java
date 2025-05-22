@@ -79,9 +79,9 @@ public class SecurityConfig {
                     httpRequest.getServletPath().startsWith("/api/auth/verify-otp") ||
                     httpRequest.getServletPath().startsWith("/api/auth/forgot-password") ||
                     httpRequest.getServletPath().startsWith("/api/auth/reset-password/")) {
-                    chain.doFilter(request, response);
-                } else {
                     jwtAuthFilter.doFilterInternal(httpRequest, httpResponse, chain);
+                } else {
+                    chain.doFilter(request, response);
                 }
             }, UsernamePasswordAuthenticationFilter.class);
         return http.build();
