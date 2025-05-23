@@ -12,30 +12,30 @@ public class WebConfig implements WebMvcConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(WebConfig.class);
 
     public WebConfig() {
-        // This should appear very early in the startup logs if the bean is loaded
         System.out.println("====== WebConfig BEAN INITIALIZED ======");
         logger.info("====== WebConfig BEAN INITIALIZED ======");
     }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // This should appear when view controllers are being added
         System.out.println("====== Adding View Controllers for SPA Fallback ======");
         logger.info("====== Adding View Controllers for SPA Fallback ======");
 
-        // Your current regex
-        registry.addViewController("/{path:^(?!api|static|css|js|images|favicon.ico).*}")
+        // This single line is designed to catch all paths that do NOT start with
+        // the specified prefixes (api, static, css, js, images, favicon.ico, error).
+        // It then forwards these requests to the root path ("/"), where your
+        // index.html is expected to be served.
+        // The regex `^(?!...)` is a negative lookahead, matching if the path doesn't start with the listed items.
+        // `.*` matches any character zero or more times, and `$` anchors it to the end of the string.
+        registry.addViewController("/{path:^(?!api|static|css|js|images|favicon.ico|error).*$}")
                 .setViewName("forward:/");
 
-        // Explicitly handle the root
+        // It's good practice to explicitly define the root path mapping,
+        // although the regex above should cover it too.
         registry.addViewController("/").setViewName("forward:/");
 
-        // You might also want to try the simpler and often robust patterns if the above doesn't work
-        // For multi-level paths (e.g., /users/profile)
-        registry.addViewController("/**/{path:[^\\.]*}") // Matches any path not containing a dot
-                .setViewName("forward:/");
-        // For single-level paths (e.g., /dashboard)
-        registry.addViewController("/{path:[^\\.]*}") // Matches a single path segment not containing a dot
-                .setViewName("forward:/");
+        // IMPORTANT: The following lines are removed as they caused the "Invalid mapping pattern" error:
+        // registry.addViewController("/**/{path:[^\\.]*}").setViewName("forward:/");
+        // registry.addViewController("/{path:[^\\.]*}").setViewName("forward:/");
     }
 }
