@@ -66,20 +66,12 @@ public class SecurityConfig {
                 // Allow access to static resources for your frontend (React build)
                 // Ensure these paths match where your static files are served from.
                 // Examples: /static/, /css/, /js/, /images/, /favicon.ico, /index.html (if served directly)
-                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/").permitAll()
+                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/index.html").permitAll()
 
-                // For all other requests that are NOT APIs or static resources,
-                // rely on the WebConfig to forward them to index.html.
-                // These paths are considered client-side routes and Spring Security
-                // should not try to authenticate them directly.
-                // This covers paths like /customerDashboard, /adminDashboard etc.
-                // The `WebConfig` will forward them to `/` where the React app loads.
-                .requestMatchers("/**").permitAll() // THIS LINE IS NOW THE FALLBACK FOR UI ROUTES
-
-                // Any request that reaches here and hasn't been permitted must be authenticated.
-                // THIS RULE IS NO LONGER NEEDED IF "/**".permitAll() IS USED FOR UI FALLBACK,
-                // AS ALL API PATHS ARE NOW EXPLICITLY DEFINED BEFORE IT.
-                // .anyRequest().authenticated()
+                // ALL OTHER REQUESTS MUST BE AUTHENTICATED
+                // This means any API path not explicitly permitted above, and potentially other routes
+                // that aren't handled by the frontend's routing fallback (if applicable)
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
@@ -88,8 +80,8 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
-                .invalidateHttpSession(false)
-                .deleteCookies("JSESSIONID")
+                .invalidateHttpSession(false) // JWT is stateless, so no server-side session to invalidate
+                .deleteCookies("JSESSIONID") // Even with stateless, this is good practice for session cookie hygiene
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
