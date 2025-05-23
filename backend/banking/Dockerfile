@@ -4,30 +4,29 @@
 FROM openjdk:17-jdk-slim AS builder
 
 # Set the working directory inside the container.
-# This WORKDIR will be the base for all subsequent COPY and RUN commands.
-# Since Render's "Root Directory" is backend/banking,
-# the Docker build context implicitly starts there.
-WORKDIR /app
+# This will be the base for copying all backend files.
+WORKDIR /app/backend/banking
 
 # Copy the mvnw, .mvn directory, pom.xml, and src directory
-# from the *current build context* (which Render has set to backend/banking/)
-# into the /app directory in the container.
-# Now, /app/pom.xml will be your backend/banking/pom.xml
-COPY mvnw .mvn/ ./
-COPY pom.xml ./
-COPY src/ ./src/
+# from the host's backend/banking directory into the container.
+# The source paths are relative to the *root of the repository* (MCAfullStackProject/)
+# because the build log indicates the build context is the repository root.
+COPY backend/banking/mvnw /app/backend/banking/
+COPY backend/banking/.mvn/ /app/backend/banking/.mvn/
+COPY backend/banking/pom.xml /app/backend/banking/
+COPY backend/banking/src/ /app/backend/banking/src/
 
-# IMPORTANT: You still need to copy the frontend directory!
-# Since the Render root is backend/banking/, the frontend is at ../frontend/
-# So, copy it to /app/frontend in the Docker image for the frontend-maven-plugin.
-COPY ../../frontend/ ./frontend/
+# Now, copy the frontend directory from its location relative to the repository root
+# to a specific location in the container.
+# This assumes it's needed for the frontend-maven-plugin.
+COPY frontend/ /app/backend/frontend/
 
-# At this point, the backend banking project is at /app,
-# and the frontend project is at /app/frontend.
-# This means your pom.xml's relative path logic (../../frontend)
-# will correctly resolve to /app/frontend from /app.
+# Change WORKDIR to the backend/banking directory where the pom.xml is located
+WORKDIR /app/backend/banking
 
 # Download dependencies (to leverage Docker layer caching)
+# Use --mount=type=cache for BuildKit for faster builds.
+# If BuildKit is not enabled, you can remove this part and rely on standard caching.
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw dependency:go-offline
 
@@ -42,8 +41,8 @@ WORKDIR /app
 EXPOSE 8080
 
 # Copy the built JAR from the builder stage
-# The JAR will be at /app/target/*.jar because /app was the WORKDIR for the build.
-COPY --from=builder /app/target/*.jar app.jar
+# The JAR will be at /app/backend/banking/target/*.jar because that was the WORKDIR for the build.
+COPY --from=builder /app/backend/banking/target/*.jar app.jar
 
 # Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
