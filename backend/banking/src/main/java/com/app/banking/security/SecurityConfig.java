@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.app.banking.security.jwt.JwtAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
@@ -52,38 +51,28 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                .requestMatchers("/api/auth/register").permitAll()
-                .requestMatchers("/api/auth/verify-otp").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/customerDashboard").hasRole("CUSTOMER")
-                .requestMatchers("/adminDashboard").hasRole("ADMIN")
+                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/**").permitAll()
                 .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated())
+                .anyRequest().authenticated()
+            )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
-                .logoutSuccessUrl("/login?logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID"))
-            .addFilterBefore((request, response, chain) -> {
-                HttpServletRequest httpRequest = (HttpServletRequest) request;
-                HttpServletResponse httpResponse = (HttpServletResponse) response;
-                if (httpRequest.getServletPath().startsWith("/api/auth/register") ||
-                    httpRequest.getServletPath().startsWith("/api/auth/verify-otp") ||
-                    httpRequest.getServletPath().startsWith("/api/auth/forgot-password") ||
-                    httpRequest.getServletPath().startsWith("/api/auth/reset-password/**")) {
-                    chain.doFilter(request, response);
-                } else {
-                    jwtAuthFilter.doFilterInternal(httpRequest, httpResponse, chain);
-                }
-            }, UsernamePasswordAuthenticationFilter.class);
+                .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
+                .invalidateHttpSession(false)
+                .deleteCookies("JSESSIONID")
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
