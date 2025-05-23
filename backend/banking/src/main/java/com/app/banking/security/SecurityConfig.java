@@ -63,14 +63,23 @@ public class SecurityConfig {
                 .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // Allow access to static resources for your frontend (React build)
-                // Ensure these paths match where your static files are served from.
-                // Examples: /static/, /css/, /js/, /images/, /favicon.ico, /index.html (if served directly)
-                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/index.html").permitAll()
+                // Allow access to specific static resources often found in the root or common paths
+                // Add any other specific files your React app might request from the root here
+                .requestMatchers("/favicon.ico", "/logo192.png", "/logo512.png", "/manifest.json").permitAll()
+
+                // Allow access to standard static resource directories
+                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+
+                // --- CRUCIAL CHANGE FOR SPA FALLBACK ---
+                // Allow the root path and any other GET request that isn't an API endpoint.
+                // This permits client-side routes (e.g., /dashboard) to reach the WebConfig's
+                // resource handler, which will then serve index.html.
+                .requestMatchers(HttpMethod.GET, "/").permitAll() // Allow initial access to root for index.html
+                .requestMatchers(HttpMethod.GET, "/**").permitAll() // THIS IS THE KEY LINE: Allows all other GET requests (SPA routes) to be served by WebConfig
 
                 // ALL OTHER REQUESTS MUST BE AUTHENTICATED
-                // This means any API path not explicitly permitted above, and potentially other routes
-                // that aren't handled by the frontend's routing fallback (if applicable)
+                // This now correctly applies to POST, PUT, DELETE, etc. requests
+                // that are not explicitly permitted above, and authenticated GET API calls.
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -80,8 +89,8 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/api/auth/logout")
                 .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
-                .invalidateHttpSession(false) // JWT is stateless, so no server-side session to invalidate
-                .deleteCookies("JSESSIONID") // Even with stateless, this is good practice for session cookie hygiene
+                .invalidateHttpSession(false)
+                .deleteCookies("JSESSIONID")
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
