@@ -2,27 +2,37 @@
 FROM openjdk:17-jdk-slim AS builder
 
 # Set the working directory inside the container.
+# IMPORTANT: Perform copies from the build context (repository root) first,
+# then change WORKDIR.
+WORKDIR /app
+
+# Copy the backend/banking directory first to maintain context.
+# This assumes your project structure is:
+# /MCAPIFullStackProject
+#   /backend/banking/
+#     mvnw
+#     .mvn/
+#     pom.xml
+#     src/
+#   /frontend/
+#     ...
+COPY backend/banking /app/backend/banking
+COPY frontend /app/frontend
+
+# Now set the WORKDIR to the banking application directory
 WORKDIR /app/backend/banking
 
-# Copy the mvnw, mvn directory, pom.xml, and src directory
-COPY backend/banking/mvnw /app/backend/banking/.
-COPY backend/banking/.mvn/ /app/backend/banking/.mvn/
-COPY backend/banking/pom.xml /app/backend/banking/
-COPY backend/banking/src/ /app/backend/banking/src/
-
-# Now, copy the frontend directory from its location relative to the repository root
-# to a specific location in the container.
-COPY frontend/ /app/frontend/
-
-# Change WORKDIR to the backend/banking directory where the pom.xml is located
-WORKDIR /app/backend/banking
+# Ensure mvnw is executable
+RUN chmod +x mvnw
 
 # --- DEBUG STEP 1: Verify frontend directory copied correctly ---
 RUN ls -R /app/frontend
 
-# Download dependencies (to leverage Docker layer caching)
+# Download dependencies and build the application
+# Use the full path to mvnw or ensure it's in the PATH.
+# Using ./mvnw is usually fine if permissions are correct.
 RUN --mount=type=cache,target=/root/.m2 \
-    .mvnw clean package -DskipTests
+    ./mvnw clean package -DskipTests
 
 # --- DEBUG STEP 2: Verify frontend build output exists ---
 RUN ls -R /app/frontend/build
