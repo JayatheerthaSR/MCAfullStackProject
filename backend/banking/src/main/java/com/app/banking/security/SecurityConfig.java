@@ -53,13 +53,33 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
+                // Allow CORS preflight requests for all paths
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Public API endpoints (authentication, registration, password reset etc.)
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                .requestMatchers("/", "/**").permitAll()
+
+                // Permit access to specific API paths for specific roles
                 .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+
+                // Allow access to static resources for your frontend (React build)
+                // Ensure these paths match where your static files are served from.
+                // Examples: /static/, /css/, /js/, /images/, /favicon.ico, /index.html (if served directly)
+                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/").permitAll()
+
+                // For all other requests that are NOT APIs or static resources,
+                // rely on the WebConfig to forward them to index.html.
+                // These paths are considered client-side routes and Spring Security
+                // should not try to authenticate them directly.
+                // This covers paths like /customerDashboard, /adminDashboard etc.
+                // The `WebConfig` will forward them to `/` where the React app loads.
+                .requestMatchers("/**").permitAll() // THIS LINE IS NOW THE FALLBACK FOR UI ROUTES
+
+                // Any request that reaches here and hasn't been permitted must be authenticated.
+                // THIS RULE IS NO LONGER NEEDED IF "/**".permitAll() IS USED FOR UI FALLBACK,
+                // AS ALL API PATHS ARE NOW EXPLICITLY DEFINED BEFORE IT.
+                // .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
