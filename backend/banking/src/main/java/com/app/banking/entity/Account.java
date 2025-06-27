@@ -21,7 +21,7 @@ public class Account {
     private String accountType;
 
     @Column(name = "balance", nullable = false, precision = 10, scale = 2)
-    private BigDecimal balance = 500000;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @ManyToMany(mappedBy = "accounts")
     private Set<Customer> customers = new HashSet<>();
