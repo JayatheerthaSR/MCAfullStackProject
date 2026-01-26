@@ -66,7 +66,16 @@ public class AuthController {
             user.setRole(Role.valueOf(registrationRequest.getRole().toUpperCase()));
             user.setPhone_number(registrationRequest.getPhone());
             userService.initiateUserRegistration(user);
-            return new ResponseEntity<>("Registration initiated. Please check your email for OTP verification.", HttpStatus.OK);
+
+            String demoOtp = userService.getPendingOtp(user.getEmail());
+
+            return ResponseEntity.ok(Map.of(
+                "message",
+                "Registration initiated. Email delivery is disabled on Render. "
+              + "For demo purposes, the OTP is displayed below.",
+                "demoOtp",
+                demoOtp
+            ));
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
