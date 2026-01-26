@@ -118,20 +118,27 @@ public class UserService {
     }
 
     public void initiateUserRegistration(User user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists");
-        }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
-        }
+	    if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+	        throw new RuntimeException("Username already exists");
+	    }
+	    if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+	        throw new RuntimeException("Email already exists");
+	    }
+	
+	    String otp = generateOTP();
+	    user.setPassword(passwordEncoder.encode(user.getPassword()));
+	    LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(10);
+	
+	    RegistrationData registrationData = new RegistrationData(user, otp, expiryTime);
+	    pendingRegistrations.put(user.getEmail(), registrationData);
+	
+	    try {
+	        emailService.sendOTPEmail(user.getEmail(), user.getFirstName(), otp);
+	    } catch (Exception e) {
+	        System.err.println("OTP email failed, user still registered: " + e.getMessage());
+	    }
+	}
 
-        String otp = generateOTP();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(10);
-        RegistrationData registrationData = new RegistrationData(user, otp, expiryTime);
-        pendingRegistrations.put(user.getEmail(), registrationData);
-        emailService.sendOTPEmail(user.getEmail(), user.getFirstName(), otp);
-    }
 
     @Transactional
     public boolean verifyOTP(String email, String otp) {
@@ -235,7 +242,12 @@ public class UserService {
             userRepository.save(user);
 
             String resetLink = frontendDomain + "/api/auth/reset-password/" + token;
-            emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
+            try {
+    emailService.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
+} catch (Exception e) {
+    System.err.println("Password reset email failed: " + e.getMessage());
+}
+
         });
     }
 
@@ -286,7 +298,12 @@ public class UserService {
 
         UpdateEmailData updateEmailData = new UpdateEmailData(newEmail, otp, expiryTime);
         pendingEmailUpdates.put(userId, updateEmailData);
-        emailService.sendUpdateEmailOTPEmail(newEmail, user.getFirstName(), otp);
+        try {
+    emailService.sendUpdateEmailOTPEmail(newEmail, user.getFirstName(), otp);
+} catch (Exception e) {
+    System.err.println("Update email OTP failed: " + e.getMessage());
+}
+
     }
 
     public boolean verifyUpdateEmailOTP(Long userId, String newEmail, String otp) {
