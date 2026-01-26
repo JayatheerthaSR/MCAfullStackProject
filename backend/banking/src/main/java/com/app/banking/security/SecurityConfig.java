@@ -51,6 +51,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors()
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 // Allow CORS preflight requests for all paths
@@ -74,8 +75,10 @@ public class SecurityConfig {
                 // Allow the root path and any other GET request that isn't an API endpoint.
                 // This permits client-side routes (e.g., /dashboard) to reach the WebConfig's
                 // resource handler, which will then serve index.html.
-                .requestMatchers(HttpMethod.GET, "/").permitAll() // Allow initial access to root for index.html
-                .requestMatchers(HttpMethod.GET, "/**").permitAll() // THIS IS THE KEY LINE: Allows all other GET requests (SPA routes) to be served by WebConfig
+                // Allow SPA entry points (frontend only)
+                .requestMatchers(HttpMethod.GET, "/", "/index.html").permitAll()
+                .requestMatchers(HttpMethod.GET, "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+
 
                 // ALL OTHER REQUESTS MUST BE AUTHENTICATED
                 // This now correctly applies to POST, PUT, DELETE, etc. requests
