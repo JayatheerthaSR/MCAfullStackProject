@@ -16,7 +16,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Value("${FROM_MAIL}")
+    @Value("${FROM_MAIL:no-reply@bankingapp.com}")
     private String fromMail;
 
     private MimeMessageHelper createMimeMessageHelper(MimeMessage message, String toEmail, String subject) throws MessagingException {
