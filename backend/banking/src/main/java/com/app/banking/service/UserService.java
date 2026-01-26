@@ -314,4 +314,10 @@ public class UserService {
         }
         return false;
     }
+
+	public String getPendingOtp(String email) {
+	    RegistrationData data = pendingRegistrations.get(email);
+	    return data != null ? data.getOtp() : null;
+	}
+
 }
